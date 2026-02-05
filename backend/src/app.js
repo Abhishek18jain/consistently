@@ -17,6 +17,7 @@ const limiter = ratelimit({
 
 });
 app.use(limiter);
+app.use("/api/journal", journalRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok" });
