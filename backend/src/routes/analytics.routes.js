@@ -8,11 +8,17 @@ import {
 } from "../controllers/analytics.controller.js";
 
 const router = express.Router();
-router.use(protect);
+console.log({
+  getMonthlyHeatmap,
+  getStreakSummary,
+  getConsistencyScore,
+  getWeakDays,
+});
 
-router.get("/heatmap", getMonthlyHeatmap);
-router.get("/streak", getStreakSummary);
-router.get("/score", getConsistencyScore);
-router.get("/weak-days", getWeakDays);
+
+router.get("/heatmap",protect, getMonthlyHeatmap);
+router.get("/streak",protect, getStreakSummary);
+router.get("/score",protect, getConsistencyScore);
+router.get("/weak-days",protect, getWeakDays);
 
 export default router;

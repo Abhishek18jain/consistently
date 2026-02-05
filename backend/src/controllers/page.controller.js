@@ -1,4 +1,4 @@
-import { updatePageContent } from "../services/page.service.js";
+import { updatePageContent } from "../services/updatepage.service.js";
 
 export const updatePage = async (req, res) => {
   try {

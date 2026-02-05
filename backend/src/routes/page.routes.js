@@ -4,9 +4,9 @@ import { updatePage } from "../controllers/page.controller.js";
 
 const router = express.Router();
 
-router.use(protect);
+// router.use(protect);
 
 // update page content
-router.put("/:pageId", updatePage);
+router.put("/:pageId",protect, updatePage);
 
 export default router;

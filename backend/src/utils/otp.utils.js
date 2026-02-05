@@ -7,6 +7,6 @@ export const generateOTP = () => {
     .createHash("sha256")
     .update(otp)
     .digest("hex");
-
+console.log(generateOTP);
   return { otp, hash };
 };

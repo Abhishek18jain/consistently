@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import mongoose from "mongoose";
 import app from "./src/app.js"
-import journalRoutes from "./routes/journal.routes.js";
+// import journalRoutes from "./routes/journal.routes.js";
 
 
 

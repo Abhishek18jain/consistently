@@ -1,6 +1,6 @@
 import Page from "../models/page.model.js";
 import Book from "../models/book.model.js";
-import { calculateCompletion } from "../utils/completion.util.js";
+import { calculateCompletion } from "../utlis/completion.utlis.js";
 import { evaluateDay } from "./streak.service.js";
 
 

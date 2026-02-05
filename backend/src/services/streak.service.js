@@ -1,4 +1,4 @@
-import DailyStats from "../models/DailyStats.model.js";
+import DailyStats from "../models/daily.model.js";
 import StreakEvent from "../models/streakevent.model.js";
 import User from "../models/user.model.js";
 

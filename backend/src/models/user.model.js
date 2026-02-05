@@ -45,6 +45,8 @@ const UserSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+passwordResetToken: String,
+passwordResetExpires: Date,
 
     badges: [
       {
@@ -57,13 +59,14 @@ const UserSchema = new mongoose.Schema(
 );
 
 // ================= PASSWORD HASH =================
-UserSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+UserSchema.pre("save", async function () {
+  if (!this.isModified("password"));
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-
-  next();
+console.log("inside model");
+  // next();..
+  console.log("outside model")
 });
 
 // ================= COMPARE =================

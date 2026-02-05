@@ -10,12 +10,11 @@ import {
 
 const router = express.Router();
 
-router.use(protect);
 
-router.post("/book", createBook);
-router.get("/books", getBooks);
-router.get("/book/:bookId", openBook);
-router.post("/book/:bookId/page/today", addTodayPage);
-router.get("/book/:bookId/pages", getBookPages);
+router.post("/book",protect, createBook);
+router.get("/books",protect, getBooks);
+router.get("/book/:bookId",protect, openBook);
+router.post("/book/:bookId/page/today",protect, addTodayPage);
+router.get("/book/:bookId/pages",protect, getBookPages);
 
 export default router;
