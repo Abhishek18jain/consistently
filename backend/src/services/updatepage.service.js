@@ -1,6 +1,8 @@
 import Page from "../models/page.model.js";
 import Book from "../models/book.model.js";
 import { calculateCompletion } from "../utils/completion.util.js";
+import { evaluateDay } from "./streak.service.js";
+
 
 export const updatePageContent = async (
   userId,
@@ -24,6 +26,15 @@ export const updatePageContent = async (
   page.completionPercent = completion;
 
   await page.save();
+if (page.contributesToStreak) {
+  await evaluateDay({
+    userId,
+    date: page.date,
+    completionPercent: page.completionPercent,
+    bookId: page.book,
+    pageId: page._id,
+  });
+}
 
   // update book timestamp
   await Book.findByIdAndUpdate(page.book, {
