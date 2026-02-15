@@ -1,70 +1,84 @@
-import DailyStats from "../models/daily.model.js";
-import StreakEvent from "../models/streakevent.model.js";
 import User from "../models/user.model.js";
+import StreakEvent from "../models/streakevent.model.js";
+import { checkAndAwardBadges } from "./badge.service.js";
+import {normalizeDate} from "../utils/date.util.js"
+/**
+ * Process streak update for a given DailyStats record
+ * @param {Object} dailyStats
+ */
+export async function processStreak(dailyStats) {
+  // console.log("Streak lookup userId:", dailyStats.userId);
+if (dailyStats.excluded === true) {
+  return { status: "ignored" };
+}
+ const user = await User.findById(dailyStats.userId).select("streak");
+  if (!user) throw new Error("User not found for streak processing");
 
-const startOfDay = (d) => {
-  const x = new Date(d);
-  x.setHours(0, 0, 0, 0);
-  return x;
-};
+  const today = normalizeDate(dailyStats.date);
+  const lastSuccess = user.streak?.lastSuccessDate
+    ? normalizeDate(user.streak.lastSuccessDate)
+    : null;
 
-export const evaluateDay = async ({
-  userId,
-  date,
-  completionPercent,
-  bookId,
-  pageId,
-}) => {
-  const day = startOfDay(date);
+  let currentStreak = user.streak?.current || 0;
+  let bestStreak = user.streak?.best || 0;
 
-  let status = "fail";
-  if (completionPercent >= 70) status = "success";
-  else if (completionPercent >= 60) status = "near-miss";
-
-  // upsert daily stats
-  const dailyStat = await DailyStats.findOneAndUpdate(
-    { user: userId, date: day },
-    {
-      user: userId,
-      date: day,
-      completionPercent,
-      status,
-      book: bookId,
-      page: pageId,
-    },
-    { upsert: true, new: true }
-  );
-
-  // fetch user
-  const user = await User.findById(userId);
-
-  // SUCCESS DAY
-  if (status === "success") {
-    user.currentStreak += 1;
-    if (user.currentStreak > user.bestStreak) {
-      user.bestStreak = user.currentStreak;
+  // ❌ FAILED DAY → BREAK STREAK
+  if (!dailyStats.success) {
+    if (currentStreak > 0) {
+      await StreakEvent.create({
+        userId: user._id,
+        eventType: "break",
+        date: today,
+        streakLength: currentStreak,
+        completion: dailyStats.completion,
+        reason: "Completion below 70%"
+      });
     }
+
+    user.streak = {
+      current: 0,
+      best: bestStreak,
+      lastSuccessDate: null
+    };
+
     await user.save();
-    return;
+    return { status: "broken" };
   }
 
-  // NEAR MISS → do nothing, but streak at risk
-  if (status === "near-miss") {
-    // streak not incremented, not broken
-    return;
-  }
+  // ✅ SUCCESS DAY
+  const isConsecutive =
+    lastSuccess &&
+    daysBetween(lastSuccess, today) === 1;
 
-  // FAILURE → BREAK STREAK
-  if (status === "fail" && user.currentStreak > 0) {
+  currentStreak = isConsecutive ? currentStreak + 1 : 1;
+  bestStreak = Math.max(bestStreak, currentStreak);
+
+  // RECOVERY EVENT
+  if (!isConsecutive && currentStreak === 1 && lastSuccess) {
     await StreakEvent.create({
-      user: userId,
-      date: day,
-      previousStreak: user.currentStreak,
-      reason: "below-threshold",
-      completionPercent,
+      userId: user._id,
+      eventType: "recovery",
+      date: today,
+      streakLength: currentStreak,
+      completion: dailyStats.completion,
+      reason: "Streak restarted after break"
     });
-
-    user.currentStreak = 0;
-    await user.save();
   }
-};
+
+  user.streak = {
+    current: currentStreak,
+    best: bestStreak,
+    lastSuccessDate: today
+  };
+
+  await user.save();
+
+  // 🎖 Badge check
+  await checkAndAwardBadges(user._id, currentStreak);
+
+  return {
+    status: "success",
+    currentStreak,
+    bestStreak
+  };
+}

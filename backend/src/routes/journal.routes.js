@@ -1,20 +1,15 @@
 import express from "express";
-import { protect } from "../middlewares/auth.middleware.js";
 import {
-  createBook,
-  getBooks,
-  openBook,
-  addTodayPage,
-  getBookPages,
+  createJournal,
+  listJournals,
+  openJournal
 } from "../controllers/journal.controller.js";
+import { requireAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-
-router.post("/book",protect, createBook);
-router.get("/books",protect, getBooks);
-router.get("/book/:bookId",protect, openBook);
-router.post("/book/:bookId/page/today",protect, addTodayPage);
-router.get("/book/:bookId/pages",protect, getBookPages);
+router.post("/", requireAuth, createJournal);
+router.get("/", requireAuth, listJournals);
+router.get("/:id", requireAuth, openJournal);
 
 export default router;

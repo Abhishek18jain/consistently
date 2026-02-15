@@ -1,14 +1,12 @@
 import mongoose from "mongoose";
 import bcrypt from "bcrypt";
 
-const UserSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
   {
-    username: {
+    name: {
       type: String,
       required: true,
-      unique: true,
-      lowercase: true,
-      trim: true,
+      trim: true
     },
 
     email: {
@@ -16,30 +14,40 @@ const UserSchema = new mongoose.Schema(
       required: true,
       unique: true,
       lowercase: true,
-      trim: true,
+      index: true
     },
 
     password: {
       type: String,
       required: true,
-      minlength: 6,
+      select: false // never return password by default
     },
 
-    reflectionPinHash: String,
-
-    bestStreak: {
-      type: Number,
-      default: 0,
+    pinHash: {
+      type: String,
+      select: false // used only to unlock reflection
     },
 
-    currentStreak: {
-      type: Number,
-      default: 0,
+    settings: {
+      timezone: { type: String, default: "Asia/Kolkata" },
+      weekStartsOn: { type: Number, default: 1 } // Monday
     },
+   otp: {
+  type: String,
+  select: false,
+},
 
-    otpHash: String,
+otpExpiresAt: {
+  type: Date,
+  select: false,
+},
 
-    otpExpiresAt: Date,
+otpAttempts: {
+  type: Number,
+  default: 0,
+  select: false,
+},
+
 
     isVerified: {
       type: Boolean,
@@ -47,31 +55,31 @@ const UserSchema = new mongoose.Schema(
     },
 passwordResetToken: String,
 passwordResetExpires: Date,
-
-    badges: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Badge",
-      },
-    ],
   },
   { timestamps: true }
 );
 
-// ================= PASSWORD HASH =================
-UserSchema.pre("save", async function () {
-  if (!this.isModified("password"));
+/* ===========================
+   PASSWORD HASHING
+   =========================== */
+
+userSchema.pre("save", async function(){
+  // ❗ critical guard
+  if (!this.isModified("password")){
+    return "something went wrong"
+  };
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-console.log("inside model");
-  // next();..
-  console.log("outside model")
+//   next();
 });
 
-// ================= COMPARE =================
-UserSchema.methods.comparePassword = function (enteredPassword) {
-  return bcrypt.compare(enteredPassword, this.password);
+/* ===========================
+   PASSWORD COMPARISON
+   =========================== */
+
+userSchema.methods.comparePassword = function (plainPassword) {
+  return bcrypt.compare(plainPassword, this.password);
 };
 
-export default mongoose.model("User", UserSchema);
+export default mongoose.model("User", userSchema);

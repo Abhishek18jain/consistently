@@ -1,84 +1,53 @@
 import Book from "../models/book.model.js";
 import Page from "../models/page.model.js";
 
-const startOfToday = () => {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
+/**
+ * Create a new journal book
+ * @param {String} userId
+ * @param {Object} payload { title?, type }
+ */
+export async function createBook(userId, payload = {}) {
+  const { title, type = "blank" } = payload;
 
-// 1️⃣ Create Book
-export const createBook = async (userId, data) => {
-  const { title, bookType, allowedTemplates = [] } = data;
-
-  return await Book.create({
-    user: userId,
-    title,
-    bookType,
-    allowedTemplates,
+  const book = await Book.create({
+    userId,
+    title: title?.trim() || "My Journal",
+    type
   });
-};
 
-// 2️⃣ List Books
-export const getBooks = async (userId) => {
-  return await Book.find({ user: userId, isArchived: false })
+  return book;
+}
+
+/**
+ * Get all books for a user (most recently updated first)
+ */
+export async function getUserBooks(userId) {
+  return Book.find({ userId })
     .sort({ updatedAt: -1 })
     .lean();
-};
+}
 
-// 3️⃣ Open Book → latest page
-export const openBook = async (userId, bookId) => {
-  const book = await Book.findOne({ _id: bookId, user: userId });
-  if (!book) throw new Error("Book not found");
-
-  const latestPage = await Page.findOne({ book: bookId })
-    .sort({ date: -1 })
-    .lean();
-
-  return { book, latestPage };
-};
-
-// 4️⃣ Add Today’s Page
-export const addTodayPage = async (userId, bookId, templateType) => {
-  const book = await Book.findOne({ _id: bookId, user: userId });
-  if (!book) throw new Error("Book not found");
-
-  if (
-    book.allowedTemplates.length &&
-    !book.allowedTemplates.includes(templateType)
-  ) {
-    throw new Error("Template not allowed for this book");
-  }
-
-  const today = startOfToday();
-
-  const exists = await Page.findOne({ book: bookId, date: today });
-  if (exists) throw new Error("Today's page already exists");
-
-  const isReflection = templateType === "reflection";
-
-  const page = await Page.create({
-    user: userId,
-    book: bookId,
-    date: today,
-    templateType,
-    isLocked: isReflection,
-    contributesToStreak: !isReflection,
+/**
+ * Get a single book by id and ensure ownership
+ */
+export async function getBookById(userId, bookId) {
+  const book = await Book.findOne({
+    _id: bookId,
+    userId
   });
 
-  book.totalPages += 1;
-  book.lastPageDate = today;
-  await book.save();
+  if (!book) {
+    throw new Error("Journal not found or access denied");
+  }
 
-  return page;
-};
+  return book;
+}
 
-// 5️⃣ Get all pages of book
-export const getBookPages = async (userId, bookId) => {
-  const book = await Book.findOne({ _id: bookId, user: userId });
-  if (!book) throw new Error("Book not found");
-
-  return await Page.find({ book: bookId })
-    .sort({ date: 1 })
+/**
+ * Get latest page of a book (used when opening a journal)
+ */
+export async function getLatestPageForBook(bookId) {
+  return Page.findOne({ bookId })
+    .sort({ date: -1 })
     .lean();
-};
+}

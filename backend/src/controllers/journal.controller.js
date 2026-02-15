@@ -1,44 +1,44 @@
-import * as journalService from "../services/journal.service.js";
+import {
+  createBook,
+  getUserBooks,
+  getBookById,
+  getLatestPageForBook
+} from "../services/journal.service.js";
 
-export const createBook = async (req, res) => {
+/**
+ * POST /journals
+ */
+export async function createJournal(req, res, next) {
+  console.log("REQ.USER:", req.user); // ADD THIS
   try {
-    const book = await journalService.createBook(req.user._id, req.body);
+    const book = await createBook(req.user.userId, req.body);
     res.status(201).json(book);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
-};
-
-export const getBooks = async (req, res) => {
-  const books = await journalService.getBooks(req.user._id);
-  res.json(books);
-};
-
-export const openBook = async (req, res) => {
-  const data = await journalService.openBook(
-    req.user._id,
-    req.params.bookId
-  );
-  res.json(data);
-};
-
-export const addTodayPage = async (req, res) => {
+}
+/**
+ * GET /journals
+ */
+export async function listJournals(req, res, next) {
   try {
-    const page = await journalService.addTodayPage(
-      req.user._id,
-      req.params.bookId,
-      req.body.templateType
-    );
-    res.status(201).json(page);
+    const books = await getUserBooks(req.user.userId);
+    res.status(200).json(books);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
-};
+}
 
-export const getBookPages = async (req, res) => {
-  const pages = await journalService.getBookPages(
-    req.user._id,
-    req.params.bookId
-  );
-  res.json(pages);
-};
+/**
+ * GET /journals/:id
+ */
+export async function openJournal(req, res, next) {
+  try {
+    const book = await getBookById(req.user.userId, req.params.id);
+    const latestPage = await getLatestPageForBook(book._id);
+
+    res.status(200).json({ book, latestPage });
+  } catch (err) {
+    next(err);
+  }
+}

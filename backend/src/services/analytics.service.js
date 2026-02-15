@@ -1,63 +1,95 @@
 import DailyStats from "../models/daily.model.js";
+import Badge from "../models/badge.model..js";
 import User from "../models/user.model.js";
 
-export const getMonthlyHeatmap = async (userId, month, year) => {
-  const start = new Date(year, month - 1, 1);
-  const end = new Date(year, month, 0, 23, 59, 59);
+import { buildMonthlyHeatmap } from "../utils/heatmap.utils.js";
+import { normalizeDate } from "../utils/date.util.js";
 
-  const stats = await DailyStats.find({
-    user: userId,
-    date: { $gte: start, $lte: end },
+/**
+ * Dashboard analytics
+ * Used for main dashboard screen
+ */
+export async function getDashboardAnalytics(userId) {
+  const user = await User.findById(userId).select("streak").lean();
+
+  if (!user) {
+    throw new Error("User not found");
+  }
+
+  const today = normalizeDate(new Date());
+  const year = today.getFullYear();
+  const month = today.getMonth() + 1;
+
+  const dailyStats = await DailyStats.find({
+    userId,
+    excluded: false
   }).lean();
 
-  return stats.map((d) => ({
-    date: d.date,
-    completionPercent: d.completionPercent,
-    status: d.status,
-  }));
-};
+  const heatmap = buildMonthlyHeatmap(dailyStats, year, month);
 
-export const getStreakSummary = async (userId) => {
-  const user = await User.findById(userId).select(
-    "currentStreak bestStreak"
-  );
+  const recentStats = dailyStats
+    .sort((a, b) => b.date - a.date)
+    .slice(0, 7);
+
+  const avgCompletion =
+    recentStats.reduce((sum, d) => sum + d.completion, 0) /
+    (recentStats.length || 1);
 
   return {
-    currentStreak: user.currentStreak,
-    bestStreak: user.bestStreak,
+    streak: user.streak || { current: 0, best: 0 },
+    averageCompletion: Math.round(avgCompletion),
+    heatmap,
+    recentDays: recentStats.length
   };
-};
-export const getConsistencyScore = async (userId) => {
-  const stats = await DailyStats.find({ user: userId })
-    .sort({ date: -1 })
-    .limit(30)
+}
+
+/**
+ * Monthly heatmap (used in profile / calendar view)
+ */
+export async function getMonthlyHeatmap(userId, year, month) {
+  const stats = await DailyStats.find({
+    userId,
+    excluded: false
+  }).lean();
+
+  return buildMonthlyHeatmap(stats, year, month);
+}
+
+/**
+ * Full profile analytics
+ * Used in profile screen
+ */
+export async function getProfileAnalytics(userId) {
+  const user = await User.findById(userId)
+    .select("streak createdAt")
     .lean();
 
-  if (!stats.length) return 0;
+  if (!user) {
+    throw new Error("User not found");
+  }
 
-  const successDays = stats.filter((d) => d.status === "success").length;
-  return Math.round((successDays / stats.length) * 100);
-};
-export const getWeakDays = async (userId) => {
-  const stats = await DailyStats.find({ user: userId }).lean();
+  const stats = await DailyStats.find({
+    userId,
+    excluded: false
+  }).lean();
 
-  const map = {};
+  const totalDays = stats.length;
+  const successDays = stats.filter(d => d.success).length;
 
-  stats.forEach((d) => {
-    const day = new Date(d.date).toLocaleString("en-US", {
-      weekday: "long",
-    });
+  const completionAvg =
+    stats.reduce((sum, d) => sum + d.completion, 0) /
+    (totalDays || 1);
 
-    if (!map[day]) {
-      map[day] = { total: 0, fails: 0 };
-    }
+  const badges = await Badge.find({ userId }).lean();
 
-    map[day].total += 1;
-    if (d.status === "fail") map[day].fails += 1;
-  });
-
-  return Object.entries(map).map(([day, v]) => ({
-    day,
-    failureRate: Math.round((v.fails / v.total) * 100),
-  }));
-};
+  return {
+    joinedAt: user.createdAt,
+    streak: user.streak || { current: 0, best: 0 },
+    totalDaysTracked: totalDays,
+    successRate: totalDays
+      ? Math.round((successDays / totalDays) * 100)
+      : 0,
+    averageCompletion: Math.round(completionAvg),
+    badges
+  };
+}

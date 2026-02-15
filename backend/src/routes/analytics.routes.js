@@ -1,24 +1,15 @@
 import express from "express";
-import { protect } from "../middlewares/auth.middleware.js";
 import {
-  getMonthlyHeatmap,
-  getStreakSummary,
-  getConsistencyScore,
-  getWeakDays,
+  dashboardAnalytics,
+  monthlyHeatmap,
+  profileAnalytics
 } from "../controllers/analytics.controller.js";
+import { requireAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
-console.log({
-  getMonthlyHeatmap,
-  getStreakSummary,
-  getConsistencyScore,
-  getWeakDays,
-});
 
-
-router.get("/heatmap",protect, getMonthlyHeatmap);
-router.get("/streak",protect, getStreakSummary);
-router.get("/score",protect, getConsistencyScore);
-router.get("/weak-days",protect, getWeakDays);
+router.get("/dashboard", requireAuth, dashboardAnalytics);
+router.get("/heatmap/:year/:month", requireAuth, monthlyHeatmap);
+router.get("/profile", requireAuth, profileAnalytics);
 
 export default router;

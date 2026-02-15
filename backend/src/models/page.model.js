@@ -2,14 +2,14 @@ import mongoose from "mongoose";
 
 const pageSchema = new mongoose.Schema(
   {
-    user: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
       index: true,
     },
 
-    book: {
+    bookId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Book",
       required: true,
@@ -39,9 +39,10 @@ const pageSchema = new mongoose.Schema(
       default: 0,
     },
 
-    contributesToStreak: {
+   
+  isReflection: {
       type: Boolean,
-      default: true,
+      default: false
     },
 
     isLocked: {
@@ -53,6 +54,6 @@ const pageSchema = new mongoose.Schema(
 );
 
 // 🚫 HARD RULE: ONE PAGE PER DAY PER BOOK
-pageSchema.index({ book: 1, date: 1 }, { unique: true });
+pageSchema.index({ bookId: 1, date: 1 }, { unique: true });
 
 export default mongoose.model("Page", pageSchema);

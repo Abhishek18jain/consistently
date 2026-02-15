@@ -1,18 +1,39 @@
-import { updatePageContent } from "../services/updatepage.service.js";
-
-export const updatePage = async (req, res) => {
+import {
+  createOrUpdatePage,
+  getPageByDate
+} from "../services/page.service.js";
+export async function savePage(req, res, next) {
   try {
-    const page = await updatePageContent(
-      req.user._id,
-      req.params.pageId,
-      req.body.content
+    const userId = req.user.userId;   // string from JWT
+
+    console.log("Controller userId:", userId);
+    const page = await createOrUpdatePage(userId, req.body);
+    
+
+    res.status(200).json(page);
+  } catch (err) {
+    next(err);
+  }
+}
+
+
+/**
+ * GET /pages/:bookId/:date
+ * Fetch page for a specific date
+ */
+export async function fetchPage(req, res, next) {
+  try {
+    const { bookId, date } = req.params;
+    const userId = req.user.userId;
+
+    const page = await getPageByDate(
+      userId,
+      bookId,
+      new Date(date)
     );
 
-    res.json({
-      pageId: page._id,
-      completionPercent: page.completionPercent,
-    });
+    res.status(200).json(page);
   } catch (err) {
-    res.status(400).json({ message: err.message });
+    next(err);
   }
-};
+}
