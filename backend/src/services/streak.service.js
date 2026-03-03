@@ -1,17 +1,17 @@
 import User from "../models/user.model.js";
 import StreakEvent from "../models/streakevent.model.js";
 import { checkAndAwardBadges } from "./badge.service.js";
-import {normalizeDate} from "../utils/date.util.js"
+import { normalizeDate, daysBetween } from "../utils/date.util.js";
 /**
  * Process streak update for a given DailyStats record
  * @param {Object} dailyStats
  */
 export async function processStreak(dailyStats) {
   // console.log("Streak lookup userId:", dailyStats.userId);
-if (dailyStats.excluded === true) {
-  return { status: "ignored" };
-}
- const user = await User.findById(dailyStats.userId).select("streak");
+  if (dailyStats.excluded === true) {
+    return { status: "ignored" };
+  }
+  const user = await User.findById(dailyStats.userId).select("streak");
   if (!user) throw new Error("User not found for streak processing");
 
   const today = normalizeDate(dailyStats.date);
@@ -30,7 +30,9 @@ if (dailyStats.excluded === true) {
         eventType: "break",
         date: today,
         streakLength: currentStreak,
+        previousStreak: currentStreak,
         completion: dailyStats.completion,
+        completionPercent: dailyStats.completion,
         reason: "Completion below 70%"
       });
     }
@@ -60,7 +62,9 @@ if (dailyStats.excluded === true) {
       eventType: "recovery",
       date: today,
       streakLength: currentStreak,
+      previousStreak: 0,
       completion: dailyStats.completion,
+      completionPercent: dailyStats.completion,
       reason: "Streak restarted after break"
     });
   }

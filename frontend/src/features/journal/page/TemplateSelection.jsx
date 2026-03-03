@@ -61,7 +61,7 @@ export default function TemplateSelectionPage() {
   /* 🧠 Loading State */
   if (loading)
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center">
         <div className="animate-pulse text-lg text-zinc-400">
           Loading templates...
         </div>
@@ -70,13 +70,13 @@ export default function TemplateSelectionPage() {
 
   if (!journal)
     return (
-      <div className="min-h-screen bg-zinc-950 text-white flex items-center justify-center">
+      <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center">
         Journal not found
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-zinc-900 text-white">
 
       {/* 🌌 Gradient Glow */}
       <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/10 via-transparent to-transparent pointer-events-none" />

@@ -13,8 +13,8 @@ app.use(morgan("dev"))
 
 
 app.use("/api", routes);
-app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+app.get("/", (req, res) => {
+  res.send("API running");
 });
 
 export default app;

@@ -3,7 +3,7 @@ export default function PatternInsights() {
     <div className="relative rounded-2xl overflow-hidden">
 
       {/* subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-zinc-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-zinc-800/80 to-zinc-900" />
 
       <div className="relative border border-zinc-800 rounded-2xl p-6">
 

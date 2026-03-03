@@ -24,7 +24,13 @@ const journalSchema = new mongoose.Schema(
         "reflection",
         "fitness",
         "blank",
-        "travel"
+        "travel",
+        "habit",
+        "budget",
+        "matrix",
+        "workspace",
+        "energy",
+        "focus"
       ],
       required: true,
       index: true,

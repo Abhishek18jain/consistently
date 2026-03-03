@@ -32,29 +32,35 @@ const userSchema = new mongoose.Schema(
       timezone: { type: String, default: "Asia/Kolkata" },
       weekStartsOn: { type: Number, default: 1 } // Monday
     },
-   otp: {
-  type: String,
-  select: false,
-},
 
-otpExpiresAt: {
-  type: Date,
-  select: false,
-},
+    streak: {
+      current: { type: Number, default: 0 },
+      best: { type: Number, default: 0 },
+      lastSuccessDate: { type: Date, default: null },
+    },
+    otp: {
+      type: String,
+      select: false,
+    },
 
-otpAttempts: {
-  type: Number,
-  default: 0,
-  select: false,
-},
+    otpExpiresAt: {
+      type: Date,
+      select: false,
+    },
+
+    otpAttempts: {
+      type: Number,
+      default: 0,
+      select: false,
+    },
 
 
     isVerified: {
       type: Boolean,
       default: false,
     },
-passwordResetToken: String,
-passwordResetExpires: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   { timestamps: true }
 );
@@ -63,10 +69,10 @@ passwordResetExpires: Date,
    PASSWORD HASHING
    =========================== */
 userSchema.pre("save", async function () {
-  if (!this.isModified("password")) return ;
+  if (!this.isModified("password")) return;
 
   // Prevent double hashing
-  if (this.password.startsWith("$2b$")) return ;
+  if (this.password.startsWith("$2b$")) return;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);

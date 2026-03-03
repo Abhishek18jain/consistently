@@ -1,6 +1,6 @@
 export default function TopNav() {
   return (
-    <header className="border-b border-zinc-800 bg-[#0b0f14]/70 backdrop-blur">
+    <header className="border-b border-zinc-800 bg-zinc-900/70 backdrop-blur">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
         <div className="flex items-center gap-10">

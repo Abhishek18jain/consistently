@@ -45,8 +45,8 @@ export default function JournalResolverPage() {
   }, [journalId, navigate]);
 
   return (
-    <div className="p-6 text-center text-gray-500">
-      Opening journal...
+    <div className="min-h-screen bg-zinc-900 flex items-center justify-center">
+      <p className="text-zinc-400">Opening journal...</p>
     </div>
   );
 }

@@ -15,7 +15,7 @@ export default function CoachScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 p-6">
+    <div className="min-h-screen bg-zinc-900 text-zinc-100 p-6">
       <h1 className="text-2xl font-semibold mb-6">Coach Analysis</h1>
 
       <div className="space-y-6 max-w-2xl">

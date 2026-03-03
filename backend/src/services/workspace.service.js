@@ -1,87 +1,72 @@
 import Book from "../models/book.model.js";
-import Page from "../models/page.model.js";
-
-function normalizeDay(date) {
-  const d = new Date(date);
-  d.setUTCHours(0, 0, 0, 0);
-  return d;
-}
+import DailyStats from "../models/daily.model.js";
+import User from "../models/user.model.js";
 
 export async function getWorkspaceStatus(userId) {
 
-  /* ================= JOURNALS ================= */
+  /* ================= USER ================= */
+  const user = await User.findById(userId).select("streak").lean();
+  const streak = user?.streak?.current || 0;
+  const bestStreak = user?.streak?.best || 0;
 
+  /* ================= JOURNALS ================= */
   const books = await Book.find({ userId, isArchived: false })
     .sort({ updatedAt: -1 })
     .lean();
 
   if (books.length === 0) {
-    return { mode: "no_journals" };
+    return {
+      mode: "no_journals",
+      journalsCount: 0,
+      streak: 0,
+      bestStreak: 0,
+      completionToday: 0,
+      avgCompletion: 0,
+      totalActiveDays: 0,
+      risk: "safe",
+      hoursLeftToday: 24,
+    };
   }
 
   const journalsCount = books.length;
   const latestBookId = books[0]._id;
 
-  /* ================= TODAY PAGE ================= */
+  /* ================= TODAY'S STATS ================= */
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
 
-  const today = normalizeDay(new Date());
-
-  const todayPage = await Page.findOne({
+  const todayStats = await DailyStats.findOne({
     userId,
     date: today,
+    excluded: false,
   }).lean();
 
-  const completionToday = todayPage?.completionPercent || 0;
-  const mode = todayPage ? "active" : "no_pages";
+  const completionToday = todayStats?.completion || 0;
+  const mode = todayStats ? "active" : "no_pages";
 
-  /* ================= QUICK STATS ================= */
+  /* ================= HISTORICAL STATS ================= */
+  const allStats = await DailyStats.find({
+    userId,
+    excluded: false,
+  }).lean();
 
-  const stats = await Page.aggregate([
-    { $match: { userId } },
-    {
-      $group: {
-        _id: null,
-        totalActiveDays: { $sum: 1 },
-        avgCompletion: { $avg: "$completionPercent" },
-        bestCompletion: { $max: "$completionPercent" },
-      },
-    },
-  ]);
-
-  const totalActiveDays = stats[0]?.totalActiveDays || 0;
-  const avgCompletion = Math.round(stats[0]?.avgCompletion || 0);
-
-  /* ================= STREAK ================= */
-
-  // Get last pages sorted by date descending
-  const recentPages = await Page.find({ userId })
-    .sort({ date: -1 })
-    .limit(30) // only need recent history
-    .lean();
-
-  let streak = 0;
-
-  for (const p of recentPages) {
-    if (p.completionPercent >= 70) streak++;
-    else break;
-  }
+  const totalActiveDays = allStats.length;
+  const avgCompletion = totalActiveDays > 0
+    ? Math.round(allStats.reduce((s, d) => s + d.completion, 0) / totalActiveDays)
+    : 0;
 
   /* ================= RISK ================= */
-
   let risk = "safe";
   if (completionToday < 40) risk = "danger";
   else if (completionToday < 70) risk = "warning";
 
   /* ================= TIME LEFT ================= */
-
   const now = new Date();
   const midnight = new Date();
   midnight.setHours(24, 0, 0, 0);
-
   const hoursLeftToday = Math.floor((midnight - now) / 3600000);
 
   /* ================= FINAL RESPONSE ================= */
-
   return {
     mode,
     journalsCount,
@@ -89,6 +74,7 @@ export async function getWorkspaceStatus(userId) {
 
     completionToday,
     streak,
+    bestStreak,
     avgCompletion,
     totalActiveDays,
 

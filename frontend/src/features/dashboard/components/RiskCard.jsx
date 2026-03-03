@@ -1,5 +1,3 @@
-import clsx from "clsx";
-
 export default function RiskCard({
   risk = "safe",
   completion = 0,
@@ -8,21 +6,21 @@ export default function RiskCard({
 }) {
   const styles = {
     safe: {
-      bg: "bg-emerald-50",
-      border: "border-emerald-500",
-      text: "text-emerald-600",
+      bg: "bg-emerald-500/10",
+      border: "border-emerald-500/40",
+      text: "text-emerald-400",
       label: "SAFE"
     },
     warning: {
-      bg: "bg-amber-50",
-      border: "border-amber-500",
-      text: "text-amber-600",
+      bg: "bg-amber-500/10",
+      border: "border-amber-500/40",
+      text: "text-amber-400",
       label: "WARNING"
     },
     critical: {
-      bg: "bg-rose-50",
-      border: "border-rose-500",
-      text: "text-rose-600",
+      bg: "bg-rose-500/10",
+      border: "border-rose-500/40",
+      text: "text-rose-400",
       label: "CRITICAL"
     }
   };
@@ -31,40 +29,36 @@ export default function RiskCard({
 
   return (
     <div
-      className={clsx(
-        "rounded-xl p-6 border-l-4 shadow-sm",
-        current.bg,
-        current.border
-      )}
+      className={`rounded-xl p-6 border-l-4 shadow-sm bg-zinc-900 border border-zinc-800 ${current.border}`}
     >
       <div className="flex items-center justify-between">
-        <h2 className={clsx("text-sm font-semibold", current.text)}>
+        <h2 className={`text-sm font-semibold ${current.text}`}>
           {current.label} RISK
         </h2>
       </div>
 
       <div className="mt-4 grid md:grid-cols-2 gap-4">
         <div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-zinc-400">
             Daily Completion
           </p>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-2xl font-bold text-zinc-100">
             {completion}%
           </p>
         </div>
 
         <div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-zinc-400">
             Current Streak
           </p>
-          <p className="text-2xl font-bold text-slate-900">
+          <p className="text-2xl font-bold text-zinc-100">
             {streak} days
           </p>
         </div>
       </div>
 
       {message && (
-        <p className="mt-4 text-sm text-slate-700">
+        <p className="mt-4 text-sm text-zinc-300">
           {message}
         </p>
       )}

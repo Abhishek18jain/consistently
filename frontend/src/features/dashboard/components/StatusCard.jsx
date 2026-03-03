@@ -24,7 +24,7 @@ export default function StatusCard({ data }) {
       <div className={`absolute -inset-10 blur-3xl ${glow} opacity-40`} />
 
       {/* Panel */}
-      <div className="relative rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-900 to-zinc-950 p-10 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+      <div className="relative rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-800/80 to-zinc-900 p-10 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
 
         {/* Top edge light */}
         <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-500 to-transparent" />

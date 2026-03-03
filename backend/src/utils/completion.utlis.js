@@ -6,7 +6,85 @@
  */
 
 /**
- * Calculate completion percentage for a page
+ * Calculate completion from raw contentJSON blocks.
+ * This is the PRIMARY function used when saving pages.
+ *
+ * Works with actual page block structure:
+ *   [{ type: "checklist", data: { items: [{ text, checked }] } }, ...]
+ *
+ * @param {Array} blocks - contentJSON blocks from the page
+ * @param {String} journalType - "todo" | "planner" | "travel" | "blank" etc.
+ * @returns {Object} { completion, success, nearMiss, excluded, totalTasks, completedTasks }
+ */
+export function calculateCompletionFromBlocks(blocks = [], journalType = "blank") {
+  // Non-trackable journal types
+  const NON_TRACKABLE = ["blank", "travel", "reflection"];
+
+  if (NON_TRACKABLE.includes(journalType)) {
+    return {
+      completion: 0,
+      success: false,
+      nearMiss: false,
+      excluded: true,
+      totalTasks: 0,
+      completedTasks: 0,
+    };
+  }
+
+  // Extract all checklist items across all checklist blocks
+  let totalTasks = 0;
+  let completedTasks = 0;
+
+  for (const block of blocks) {
+    if (block.type === "checklist") {
+      const items = Array.isArray(block.data?.items) ? block.data.items : [];
+
+      for (const item of items) {
+        // Items can be strings or objects
+        if (typeof item === "string") {
+          if (item.trim()) {
+            totalTasks++;
+            // String items can't be checked
+          }
+        } else if (item && typeof item === "object") {
+          const text = item.text?.trim?.() || "";
+          if (text) {
+            totalTasks++;
+            if (item.checked) {
+              completedTasks++;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // No tasks = nothing to track
+  if (totalTasks === 0) {
+    return {
+      completion: 0,
+      success: false,
+      nearMiss: false,
+      excluded: true, // no tasks = excluded from streak
+      totalTasks: 0,
+      completedTasks: 0,
+    };
+  }
+
+  const completion = Math.round((completedTasks / totalTasks) * 100);
+
+  return {
+    completion,
+    success: isSuccess(completion),
+    nearMiss: isNearMiss(completion),
+    excluded: false,
+    totalTasks,
+    completedTasks,
+  };
+}
+
+/**
+ * Legacy: Calculate completion percentage for a page using template rules
  * @param {Object} template - Template document from DB
  * @param {Object} content - User filled page content
  * @returns {Object} { completion, success, nearMiss, excluded }
@@ -66,13 +144,6 @@ export function calculateCompletion(template, content = {}) {
 
 /**
  * Checklist Rule
- * Used for: todo, grocery
- *
- * Expected content shape:
- * {
- *   items: string[],
- *   completedItems: string[]
- * }
  */
 function checklistRule(content) {
   const items = Array.isArray(content.items) ? content.items : [];
@@ -91,13 +162,6 @@ function checklistRule(content) {
 
 /**
  * Ratio Rule
- * Used for: study, work
- *
- * Expected content shape:
- * {
- *   planned: number,
- *   completed: number
- * }
  */
 function ratioRule(content) {
   const planned = Number(content.planned);

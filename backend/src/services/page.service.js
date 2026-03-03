@@ -116,11 +116,13 @@ export async function getPreviousPage({ journalId, date }) {
 }
 
 export async function updatePageContent({ pageId, contentJSON }) {
-  return Page.findByIdAndUpdate(
+  const page = await Page.findByIdAndUpdate(
     pageId,
     { contentJSON },
     { new: true }
   );
+
+  return page;
 }
 
 /* =========================================================

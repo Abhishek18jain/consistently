@@ -3,7 +3,7 @@ export default function CoachInsight() {
   return (
     <div className="relative rounded-2xl overflow-hidden">
 
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-900 to-zinc-950" />
+      <div className="absolute inset-0 bg-gradient-to-b from-zinc-800/80 to-zinc-900" />
 
       <div className="relative border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between">
 
@@ -21,7 +21,7 @@ export default function CoachInsight() {
         </p>
 
         {/* Button */}
-        <Link to = "/coach" className="px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-sm">
+        <Link to="/coach" className="px-4 py-2 rounded-lg border border-zinc-700 bg-zinc-800 hover:bg-zinc-700 text-sm">
           Analyze with Coach
         </Link>
 

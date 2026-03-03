@@ -38,61 +38,68 @@ export default function CreateJournalPage() {
   }
 
   return (
-    <div className="p-6 max-w-lg mx-auto">
-      <h1 className="text-2xl font-semibold mb-6">
-        Create New Journal
-      </h1>
+    <div className="min-h-screen bg-zinc-900 p-6">
+      <div className="max-w-lg mx-auto">
+        <h1 className="text-2xl font-semibold text-zinc-100 mb-6">
+          Create New Journal
+        </h1>
 
-      <form onSubmit={handleCreate}>
-        {/* TITLE */}
-        <div className="mb-4">
-          <label className="block mb-1">
-            Journal Title
-          </label>
+        <form onSubmit={handleCreate} className="space-y-6">
+          {/* TITLE */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-zinc-300">
+              Journal Title
+            </label>
 
-          <input
-            type="text"
-            value={title}
-            onChange={(e) =>
-              setTitle(e.target.value)
-            }
-            placeholder="My Journal"
-            className="w-full border p-2 rounded"
-          />
-        </div>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) =>
+                setTitle(e.target.value)
+              }
+              placeholder="My Journal"
+              className="w-full border border-zinc-700 bg-zinc-800 text-zinc-100
+                         p-3 rounded-xl outline-none focus:border-blue-500
+                         placeholder-zinc-500 transition-colors"
+            />
+          </div>
 
-        {/* TYPE */}
-        <div className="mb-6">
-          <label className="block mb-1">
-            Journal Type
-          </label>
+          {/* TYPE */}
+          <div>
+            <label className="block mb-1 text-sm font-medium text-zinc-300">
+              Journal Type
+            </label>
 
-          <select
-            value={journalType}
-            onChange={(e) =>
-              setJournalType(e.target.value)
-            }
-            className="w-full border p-2 rounded"
+            <select
+              value={journalType}
+              onChange={(e) =>
+                setJournalType(e.target.value)
+              }
+              className="w-full border border-zinc-700 bg-zinc-800 text-zinc-100
+                         p-3 rounded-xl outline-none focus:border-blue-500
+                         transition-colors"
+            >
+              <option value="planner">Planner</option>
+              <option value="todo">Todo</option>
+              <option value="study">Study</option>
+              <option value="reflection">
+                Reflection
+              </option>
+              <option value="fitness">Fitness</option>
+              <option value="blank">Blank</option>
+            </select>
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-xl
+                       font-medium transition-colors disabled:opacity-50 active:scale-95"
           >
-            <option value="planner">Planner</option>
-            <option value="todo">Todo</option>
-            <option value="study">Study</option>
-            <option value="reflection">
-              Reflection
-            </option>
-            <option value="fitness">Fitness</option>
-            <option value="blank">Blank</option>
-          </select>
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-black text-white px-4 py-2 rounded"
-        >
-          {loading ? "Creating..." : "Create"}
-        </button>
-      </form>
+            {loading ? "Creating..." : "Create"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }
