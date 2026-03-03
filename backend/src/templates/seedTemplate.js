@@ -4,7 +4,7 @@ import { templates } from "../templates/index.js"; // your array
 
 async function seed() {
   try {
-    await mongoose.connect(process.env.mangoUri);
+    // await mongoose.connect(process.env.mangoUri);
 
     // Optional: wipe old templates
     await Template.deleteMany({});
