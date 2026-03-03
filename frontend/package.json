@@ -12,15 +12,22 @@
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "cookie-parser": "^1.4.7",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.19",
     "framer-motion": "^12.34.0",
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.564.0",
+    "nanoid": "^5.1.6",
     "react": "^19.2.4",
+    "react-calendar-heatmap": "^1.10.0",
     "react-dom": "^19.2.4",
+    "react-hot-toast": "^2.6.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.0",
     "react-scripts": "5.0.1",
-    "web-vitals": "^2.1.4"
+    "recharts": "^3.7.0",
+    "web-vitals": "^2.1.4",
+    "zustand": "^5.0.11"
   },
   "scripts": {
     "start": "react-scripts start",

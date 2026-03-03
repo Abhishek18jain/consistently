@@ -1,53 +1,159 @@
-import Book from "../models/book.model.js";
-import Page from "../models/page.model.js";
+import JournalModel from "../models/book.model.js";
+import Page from "../models/page.model.js"
+import Template from "../models/template.model.js";
 
-/**
- * Create a new journal book
- * @param {String} userId
- * @param {Object} payload { title?, type }
- */
-export async function createBook(userId, payload = {}) {
-  const { title, type = "blank" } = payload;
+/* =========================================================
+   🆕 CREATE JOURNAL
+   Supports:
+   1) Choose template now
+   2) Choose template later
+========================================================= */
+export async function createJournalService(userId, payload) {
+  const {
+    title,
+    journalType,
+    templateId = null
+  } = payload;
 
-  const book = await Book.create({
+  if (!journalType) {
+    throw new Error("Journal type is required");
+  }
+
+  /* 🧠 If template selected now → validate */
+  let setupStatus = "CREATED";
+
+  if (templateId) {
+    const template = await Template.findById(templateId);
+
+    if (!template) {
+      throw new Error("Invalid template");
+    }
+
+    if (template.journalType !== journalType) {
+      throw new Error("Template does not belong to this journal type");
+    }
+
+    setupStatus = "READY";
+  }
+
+  const Journal = await JournalModel.create({
     userId,
     title: title?.trim() || "My Journal",
-    type
+    journalType,
+    defaultTemplateId: templateId,
+    setupStatus,
+    totalPages: 0,
+    lastPageDate: null
   });
 
-  return book;
+  return Journal;
+}
+/* =========================================================
+   🎯 SELECT TEMPLATE FOR EXISTING JOURNAL
+========================================================= */
+export async function setJournalTemplate(
+  userId,
+  JournalId,
+  templateId
+) {
+  const Journal = await JournalModel.findOne({
+    _id: JournalId,
+    userId,
+    isArchived: false
+  });
+
+  if (!Journal) {
+    throw new Error("Journal not found");
+  }
+
+  const template = await Template.findById(templateId);
+
+  if (!template) {
+    throw new Error("Invalid template");
+  }
+
+  /* 🧠 Ensure template matches journal type */
+  if (template.journalType !== Journal.journalType) {
+    throw new Error("Template not allowed for this journal type");
+  }
+
+  Journal.defaultTemplateId = templateId;
+  Journal.setupStatus = "READY";
+
+  await Journal.save();
+
+  return Journal;
 }
 
-/**
- * Get all books for a user (most recently updated first)
- */
-export async function getUserBooks(userId) {
-  return Book.find({ userId })
+/* =========================================================
+   📚 GET USER JOURNALS
+========================================================= */
+export async function getUserJournals(userId) {
+  return JournalModel.find({
+    userId,
+    isArchived: false
+  })
     .sort({ updatedAt: -1 })
     .lean();
 }
-
-/**
- * Get a single book by id and ensure ownership
- */
-export async function getBookById(userId, bookId) {
-  const book = await Book.findOne({
-    _id: bookId,
-    userId
+/* =========================================================
+   🔍 GET JOURNAL BY ID
+========================================================= */
+export async function getJournalById(userId, journalId) {
+  const journal = await JournalModel.findOne({
+    _id: journalId,
+    userId,
+    isArchived: false
   });
 
-  if (!book) {
+  if (!journal) {
     throw new Error("Journal not found or access denied");
   }
 
-  return book;
+  return journal;
 }
+/* =========================================================
+   📂 ARCHIVE JOURNAL
+========================================================= */
+export async function archiveJournalService(userId, JournalId) {
+  const Journal = await JournalModel.findOneAndUpdate(
+    { _id: JournalId, userId },
+    { isArchived: true },
+    { new: true }
+  );
 
-/**
- * Get latest page of a book (used when opening a journal)
- */
-export async function getLatestPageForBook(bookId) {
-  return Page.findOne({ bookId })
-    .sort({ date: -1 })
+  if (!Journal) {
+    throw new Error("Journal not found");
+  }
+
+  return Journal;
+}
+export async function journalHasPages(JournalId) {
+  const page = await Page.findOne({ journalId: JournalId }).lean();
+  return !!page;
+}
+export async function getLatestPageOfJournal(JournalId) {
+  const latestPage = await Page.findOne({
+    journalId: JournalId,
+  })
+    .sort({ date: -1 }) // newest date first
     .lean();
+
+  return latestPage;
+}
+export async function getJournalResolverData(
+  userId,
+  JournalId
+) {
+  const Journal = await getJournalById(userId, JournalId);
+
+  const latestPage = await getLatestPageOfJournal(
+    JournalId
+  );
+
+  return {
+    Journal,
+    hasPages: !!latestPage,
+    latestPageDate: latestPage?.date || null,
+  };
 }

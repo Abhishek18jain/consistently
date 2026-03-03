@@ -1,70 +1,95 @@
-import mongoose from "mongoose";
-import Template from "../models/template.model.js";
-import dotenv from "dotenv";
+export const templates = [
 
-dotenv.config();
-const templates = [
+  // ===== TODO =====
   {
-    key: "todo_day",
-    name: "Daily To-Do",
-    category: "planning",
-    completionRule: "checklist",
-    affectsStreak: true,
-    coachReadable: true,
-    active: true,
-    schema: {
-      tasks: [
-        {
-          title: String,
-          done: Boolean
-        }
-      ]
-    },
-    requiredFields: ["tasks"]
+    name: "Eisenhower Matrix",
+    type: "todo",
+    description: "Prioritize tasks by urgency and importance",
+    thumbnail: "/templates/eisenhower.png",
+    tags: ["priority", "productivity"],
+    blocks: [{ type: "matrix", variant: "eisenhower" }]
   },
   {
-    key: "ratio_day",
-    name: "Ratio Tracking",
-    category: "work",
-    completionRule: "ratio",
-    affectsStreak: true,
-    coachReadable: true,
-    active: true,
-    schema: {
-      target: Number,
-      completed: Number
-    },
-    requiredFields: ["target", "completed"]
+    name: "Focus Mode Todo",
+    type: "todo",
+    description: "Tasks with Pomodoro focus timer",
+    thumbnail: "/templates/focus.png",
+    tags: ["focus", "pomodoro"],
+    blocks: [{ type: "focusTasks" }]
   },
   {
-    key: "reflection_day",
-    name: "Reflection",
-    category: "reflection",
-    completionRule: "manual",
-    affectsStreak: false,
-    coachReadable: false,
-    active: true,
-    schema: {
-      note: String
-    },
-    requiredFields: ["note"]
+    name: "Energy Planner",
+    type: "todo",
+    description: "Plan tasks based on energy level",
+    thumbnail: "/templates/energy.png",
+    tags: ["energy", "planning"],
+    blocks: [{ type: "energySections" }]
+  },
+
+  // ===== PLANNER =====
+  {
+    name: "Habit Tracker",
+    type: "planner",
+    description: "Track daily habits weekly",
+    thumbnail: "/templates/habits.png",
+    tags: ["habits"],
+    blocks: [{ type: "habitGrid" }]
+  },
+  {
+    name: "Workspace Dashboard",
+    type: "planner",
+    description: "Checklist, notes, calendar, tasks",
+    thumbnail: "/templates/workspace.png",
+    tags: ["dashboard"],
+    blocks: [{ type: "workspaceWidgets" }]
+  },
+  {
+    name: "Budget Tracker",
+    type: "planner",
+    description: "Track expenses and budget",
+    thumbnail: "/templates/budget.png",
+    tags: ["finance"],
+    blocks: [{ type: "budgetSummary" }]
+  },
+  {
+    name: "Packing List",
+    type: "planner",
+    description: "Prepare items for trips",
+    thumbnail: "/templates/packing.png",
+    tags: ["travel", "checklist"],
+    blocks: [{ type: "packingList" }]
+  },
+
+  // ===== TRAVEL =====
+  {
+    name: "Travel Journal",
+    type: "travel",
+    description: "Capture trip memories",
+    thumbnail: "/templates/travel.png",
+    tags: ["journal"],
+    blocks: [
+      { type: "title" },
+      { type: "text" },
+      { type: "images" },
+      { type: "mood" }
+    ]
+  },
+
+  // ===== BLANK =====
+  {
+    name: "Brain Dump",
+    type: "blank",
+    description: "Quickly capture thoughts",
+    thumbnail: "/templates/braindump.png",
+    tags: ["notes"],
+    blocks: [{ type: "quickNotes" }]
+  },
+  {
+    name: "Blank Editor",
+    type: "blank",
+    description: "Start from scratch",
+    thumbnail: "/templates/blank.png",
+    tags: ["empty"],
+    blocks: []
   }
 ];
-
-
-async function seedTemplates() {
-  try {
-    await mongoose.connect("mongodb://localhost:27017/consistently?directConnection=true");
-
-    await Template.deleteMany({});
-    await Template.insertMany(templates);
-
-    console.log("Templates seeded successfully");
-    process.exit();
-  } catch (err) {
-    console.error(err);
-    process.exit(1);
-  }
-}
-
-seedTemplates();

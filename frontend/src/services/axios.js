@@ -6,7 +6,10 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = store.getState().auth.token;
+  const stateToken = store.getState().auth.token;
+  const storageToken = localStorage.getItem("token");
+
+  const token = stateToken || storageToken;
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
@@ -14,5 +17,4 @@ api.interceptors.request.use((config) => {
 
   return config;
 });
-
 export default api;

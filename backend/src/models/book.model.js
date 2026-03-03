@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 
-const bookSchema = new mongoose.Schema({
-userId: {
+const journalSchema = new mongoose.Schema(
+  {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -14,16 +15,38 @@ userId: {
       default: "My Journal",
     },
 
-    bookType: {
+    journalType: {
       type: String,
-      enum: ["blank", "exam", "travel", "planning"],
-      default: "blank",
+      enum: [
+        "todo",
+        "planner",
+        "study",
+        "reflection",
+        "fitness",
+        "blank",
+        "travel"
+      ],
+      required: true,
+      index: true,
     },
 
-    allowedTemplates: {
-      type: [String],
-      default: [],
-      // example: ["todo", "study", "planning"]
+    /* default template */
+    defaultTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Template",
+      default: null,
+    },
+
+    /* fast open last page */
+    currentPageId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Page",
+      default: null,
+    },
+
+    currentPageDate: {
+      type: String, // YYYY-MM-DD
+      default: null,
     },
 
     totalPages: {
@@ -32,15 +55,29 @@ userId: {
     },
 
     lastPageDate: {
-      type: Date,
+      type: String, // YYYY-MM-DD
+      default: null,
+    },
+
+    settings: {
+      allowFuturePages: {
+        type: Boolean,
+        default: false,
+      },
+
+      autoCreateDailyPage: {
+        type: Boolean,
+        default: true,
+      },
     },
 
     isArchived: {
       type: Boolean,
       default: false,
+      index: true,
     },
   },
   { timestamps: true }
-  
-)
-export default mongoose.model("Book", bookSchema);
+);
+
+export default mongoose.model("Journal", journalSchema);

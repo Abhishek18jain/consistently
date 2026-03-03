@@ -1,64 +1,34 @@
+// models/template.model.js
+
 import mongoose from "mongoose";
+const blockSchema = new mongoose.Schema({
+  type: String,
+  variant: String
+}, { _id: false });
 
 const templateSchema = new mongoose.Schema(
   {
-    key: {
+    name: { type: String, required: true },
+
+    type: {
       type: String,
       required: true,
-      unique: true,
-      index: true
-      // e.g. "todo_day", "study_day"
+      index: true,
     },
 
-    name: {
-      type: String,
-      required: true
-    },
+    description: String,
 
-    category: {
-      type: String,
-      enum: ["planning", "list", "work", "study", "reflection"],
-      required: true
-    },
+    thumbnail: String,
+      blocks: [blockSchema],
+       templateKind: String,
+         tags: [String]
+,
 
-    schema: {
-      type: Object,
-      required: true
-      /*
-        Example:
-        {
-          tasks: { type: "array", item: "string" },
-          completedTasks: { type: "array", item: "string" }
-        }
-      */
-    },
 
-    requiredFields: {
-      type: [String],
-      default: []
-      // fields required for 100% completion
+    structureJSON: {
+      type: Array, // same block structure
+      default: [],
     },
-
-    completionRule: {
-      type: String,
-      enum: ["checklist", "ratio", "manual"],
-      required: true
-    },
-
-    affectsStreak: {
-      type: Boolean,
-      default: true
-    },
-
-    coachReadable: {
-      type: Boolean,
-      default: true
-    },
-
-    active: {
-      type: Boolean,
-      default: true
-    }
   },
   { timestamps: true }
 );

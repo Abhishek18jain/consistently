@@ -1,95 +1,218 @@
-import Page from "../models/page.model.js";
-import Book from "../models/book.model.js";
-import Template from "../models/template.model.js";
+// services/page.service.js
 
-import { buildDailyStats } from "./dailyStats.service.js";
-import { processStreak } from "./streak.service.js";
+import Journal from "../models/book.model.js";
+import Page from "../models/page.model.js";
+import Template from "../models/template.model.js";
+import { getTodayDateString } from "../utils/date.util.js";
+import { buildTemplateContent } from "./pageTemplate.service.js";
+
+function isEffectivelyBlankContent(contentJSON = []) {
+  if (!Array.isArray(contentJSON) || contentJSON.length === 0) {
+    return true;
+  }
+
+  if (contentJSON.length === 1) {
+    const block = contentJSON[0];
+
+    if (block?.type === "text") {
+      return !block?.data?.text?.trim?.();
+    }
+
+    if (block?.type === "checklist") {
+      return !Array.isArray(block?.data?.items) || block.data.items.length === 0;
+    }
+  }
+
+  return false;
+}
+
+async function updateJournalAfterPageCreate({
+  journalId,
+  pageId,
+  date,
+  templateId,
+}) {
+  const setUpdate = {
+    currentPageId: pageId,
+    currentPageDate: date,
+    lastPageDate: date,
+  };
+
+  if (templateId) {
+    setUpdate.defaultTemplateId = templateId;
+    setUpdate.setupStatus = "READY";
+  }
+
+  await Journal.findByIdAndUpdate(
+    journalId,
+    {
+      $set: setUpdate,
+      $inc: { totalPages: 1 },
+    },
+    { new: true }
+  );
+}
 
 /**
- * Create or update a page for a given book & date
- */export async function createOrUpdatePage(userId, payload) {
-  const { bookId, date, templateKey, content } = payload;
+ * CREATE PAGE FROM TEMPLATE FOR TODAY
+ */
+export async function createPageFromTemplate({ journalId, templateId }) {
+  const today = getTodayDateString();
 
-  if (!bookId || !date || !templateKey) {
-    throw new Error("Missing required page data");
+  const existing = await Page.findOne({ journalId, date: today });
+  if (existing) {
+    await Journal.findByIdAndUpdate(
+      journalId,
+      {
+        defaultTemplateId: templateId,
+        setupStatus: "READY",
+        currentPageId: existing._id,
+        currentPageDate: existing.date,
+      },
+      { new: true }
+    );
+
+    return existing;
   }
 
-  const book = await Book.findOne({ _id: bookId, userId });
-  if (!book) {
-    throw new Error("Journal not found or access denied");
-  }
+  const template = await Template.findById(templateId);
+  if (!template) throw new Error("Template not found");
 
-  const template = await Template.findOne({
-    key: templateKey,
-    active: true
+  const content = buildTemplateContent(template);
+
+  const page = await Page.create({
+    journalId,
+    date: today,
+    contentJSON: content,
+    createdFromTemplateId: templateId,
   });
 
-  if (!template) {
-    throw new Error("Invalid or inactive template");
-  }
-
-  // Normalize date (UTC)
-  const day = new Date(date);
-  day.setUTCHours(0, 0, 0, 0);
-
-  let page = await Page.findOne({
-    userId,
-    bookId,
-    date: day
+  await updateJournalAfterPageCreate({
+    journalId,
+    pageId: page._id,
+    date: today,
+    templateId,
   });
-
-  if (page) {
-    page.templateType = template.key;
-    page.content = content;
-    page.isReflection = !template.affectsStreak;
-    page.isLocked = template.category === "reflection";
-  } else {
-    page = new Page({
-      userId,
-      bookId,
-      date: day,
-      templateType: template.key,
-      content,
-      isReflection: !template.affectsStreak,
-      isLocked: template.category === "reflection"
-    });
-  }
-
-  await page.save();
-
-  // Update last activity
-  book.lastPageDate = day;
-  await book.save();
-
-  // Analytics layer
-  const dailyStats = await buildDailyStats(page, template);
-
-  page.completionPercent = dailyStats.completion;
-  await page.save();
-
-  // Streak engine
-  await processStreak(dailyStats);
 
   return page;
 }
 
-
-/**
- * Get page for a specific book & date (read-only)
- */
-export async function getPageByDate(userId, bookId, date) {
-  const start = new Date(date);
-  start.setHours(0, 0, 0, 0);
-
-  const end = new Date(date);
-  end.setHours(23, 59, 59, 999);
-
-  const page = await Page.findOne({
-    userId,
-    bookId,
-    date: { $gte: start, $lte: end }
-  }).lean();
-
-  return page || null;
+export async function getPageByDate({ journalId, date }) {
+  return Page.findOne({ journalId, date });
 }
 
+export async function getNextPage({ journalId, date }) {
+  return Page.findOne({
+    journalId,
+    date: { $gt: date },
+  }).sort({ date: 1 });
+}
+
+export async function getPreviousPage({ journalId, date }) {
+  return Page.findOne({
+    journalId,
+    date: { $lt: date },
+  }).sort({ date: -1 });
+}
+
+export async function updatePageContent({ pageId, contentJSON }) {
+  return Page.findByIdAndUpdate(
+    pageId,
+    { contentJSON },
+    { new: true }
+  );
+}
+
+/* =========================================================
+   CREATE BLANK PAGE FOR A DATE
+========================================================= */
+export async function createBlankPage({
+  journalId,
+  date,
+}) {
+  const existing = await Page.findOne({
+    journalId,
+    date,
+  });
+
+  if (existing) return existing;
+
+  let template = null;
+
+  const journal = await Journal.findById(journalId).select(
+    "defaultTemplateId"
+  );
+
+  if (journal?.defaultTemplateId) {
+    template = await Template.findById(journal.defaultTemplateId);
+  }
+
+  const content = template
+    ? buildTemplateContent(template)
+    : [];
+
+  const page = await Page.create({
+    journalId,
+    date,
+    contentJSON: content,
+    createdFromTemplateId: template?._id || null,
+  });
+
+  await updateJournalAfterPageCreate({
+    journalId,
+    pageId: page._id,
+    date,
+    templateId: template?._id || null,
+  });
+
+  return page;
+}
+
+/* =========================================================
+   GET OR CREATE PAGE FOR DATE
+========================================================= */
+export async function getOrCreatePageByDate({
+  journalId,
+  date,
+}) {
+  const existingPage = await Page.findOne({
+    journalId,
+    date,
+  });
+
+  if (!existingPage) {
+    return createBlankPage({
+      journalId,
+      date,
+    });
+  }
+
+  if (
+    !existingPage.createdFromTemplateId &&
+    isEffectivelyBlankContent(existingPage.contentJSON)
+  ) {
+    const journal = await Journal.findById(journalId).select(
+      "defaultTemplateId"
+    );
+
+    if (journal?.defaultTemplateId) {
+      const template = await Template.findById(journal.defaultTemplateId);
+
+      if (template) {
+        existingPage.contentJSON = buildTemplateContent(template);
+        existingPage.createdFromTemplateId = template._id;
+        await existingPage.save();
+      }
+    }
+  }
+
+  return existingPage;
+}
+
+/* =========================================================
+   GET LATEST PAGE OF JOURNAL
+========================================================= */
+export async function getLatestPage(journalId) {
+  return Page.findOne({ journalId })
+    .sort({ date: -1 });
+}

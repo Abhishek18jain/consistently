@@ -13,7 +13,7 @@ export async function runCoach(userId, questionKey) {
     case "WHY_STREAK_BROKE":
       return await explainStreakBreak(userId);
 
-    case "WEAK_DAYS":
+    case "WEEK_DAYS":
       return await findWeakDays(userId);
 
     case "WHAT_TO_ADJUST":

@@ -12,7 +12,7 @@ export async function register(req, res, next) {
 
     res.status(201).json({
       message: "Registered successfully. OTP sent.",
-      userId: result.userId,
+    
     });
   } catch (err) {
     next(err);
@@ -21,9 +21,10 @@ export async function register(req, res, next) {
 
 export async function verifyEmail(req, res, next) {
   try {
-    const { email, otp } = req.body;
+    //  const { userId } = req.params;
+    const { email,otp } = req.body;
 
-    await AuthService.verifyOtp({ email, otp });
+    await AuthService.verifyOtp({email, otp });
 
     res.json({ message: "Email verified" });
   } catch (err) {
@@ -34,6 +35,7 @@ export async function verifyEmail(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
+// console.log("email", email , password);
 
     const { token } = await AuthService.loginUser({ email, password });
 

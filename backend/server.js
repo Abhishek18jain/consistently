@@ -6,7 +6,7 @@ import app from "./src/app.js"
 
 
 
-const port = process.env.PORT || 5000;
+
 
 mongoose.connect(process.env.MONGO_URI).then(()=>{
     console.log("connected successfully");
@@ -17,3 +17,11 @@ mongoose.connect(process.env.MONGO_URI).then(()=>{
       console.error("❌ Mongo connection error:", err);
     process.exit(1);
 })
+// app.use((err, req, res, next) => {
+//   res.status(err.statusCode || 500).json({
+//     message: err.message || "Server error"
+//   });
+//   next()
+// });
+
+const port = process.env.PORT || 5000;

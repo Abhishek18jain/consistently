@@ -62,24 +62,27 @@ passwordResetExpires: Date,
 /* ===========================
    PASSWORD HASHING
    =========================== */
+userSchema.pre("save", async function () {
+  if (!this.isModified("password")) return ;
 
-userSchema.pre("save", async function(){
-  // ❗ critical guard
-  if (!this.isModified("password")){
-    return "something went wrong"
-  };
+  // Prevent double hashing
+  if (this.password.startsWith("$2b$")) return ;
 
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
-//   next();
+
+  // next();
 });
+
+
 
 /* ===========================
    PASSWORD COMPARISON
    =========================== */
 
-userSchema.methods.comparePassword = function (plainPassword) {
-  return bcrypt.compare(plainPassword, this.password);
+userSchema.methods.comparePassword = async function (candidatePassword) {
+  return await bcrypt.compare(candidatePassword, this.password);
 };
+
 
 export default mongoose.model("User", userSchema);

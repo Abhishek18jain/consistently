@@ -1,59 +1,51 @@
+// models/page.model.js
+
 import mongoose from "mongoose";
+
+const blockSchema = new mongoose.Schema(
+  {
+    id: { type: String, required: true },
+    type: {
+      type: String,
+      enum: ["text", "checklist", "image", "divider"],
+      required: true,
+    },
+    data: { type: mongoose.Schema.Types.Mixed, default: {} },
+  },
+  { _id: false }
+);
 
 const pageSchema = new mongoose.Schema(
   {
-    userId: {
+    journalId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-      index: true,
-    },
-
-    bookId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Book",
+      ref: "Journal",
       required: true,
       index: true,
     },
 
     date: {
-      type: Date,
+      type: String, // YYYY-MM-DD
       required: true,
     },
 
-    templateType: {
-      type: String,
-      required: true,
-      // examples: todo, grocery, study, work, planning, reflection
+    contentJSON: {
+      type: [blockSchema],
+      default: [],
     },
 
-    content: {
-      type: Object,
-      default: {},
-    },
-
-    completionPercent: {
-      type: Number,
-      min: 0,
-      max: 100,
-      default: 0,
-    },
-
-   
-  isReflection: {
-      type: Boolean,
-      default: false
-    },
-
-    isLocked: {
-      type: Boolean,
-      default: false, // true for reflection
+    createdFromTemplateId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Template",
+      default: null,
     },
   },
   { timestamps: true }
 );
 
-// 🚫 HARD RULE: ONE PAGE PER DAY PER BOOK
-pageSchema.index({ bookId: 1, date: 1 }, { unique: true });
+/**
+ * 🔥 ENFORCE ONE PAGE PER DATE PER JOURNAL
+ */
+pageSchema.index({ journalId: 1, date: 1 }, { unique: true });
 
 export default mongoose.model("Page", pageSchema);

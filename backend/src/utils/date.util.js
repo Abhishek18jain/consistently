@@ -65,3 +65,14 @@ export function getMonthDateRange(year, month) {
 
   return dates;
 }
+// utils/date.js
+
+export function getTodayDateString() {
+  return new Date().toISOString().split("T")[0];
+}
+
+export function addDays(dateString, days) {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + days);
+  return date.toISOString().split("T")[0];
+}
