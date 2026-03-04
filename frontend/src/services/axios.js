@@ -2,8 +2,10 @@ import axios from "axios";
 import { store } from "../app/store";
 
 const api = axios.create({
-  baseURL: "https://consistently-15d8.onrender.com || http://localhost:5000/api"
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true
 });
+
 
 api.interceptors.request.use((config) => {
   const stateToken = store.getState().auth.token;
