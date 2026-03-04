@@ -3,57 +3,58 @@ export default function StatusCard({ data }) {
   const streak = data?.streak?.current ?? 0;
 
   let risk = "Safe";
-  let badge = "bg-emerald-500/20 text-emerald-400";
-  let glow = "bg-emerald-500/20";
+  let badge = "bg-emerald-50 text-emerald-600 border border-emerald-200";
+  let ringColor = "ring-emerald-400";
 
   if (completion < 70) {
     risk = "Warning";
-    badge = "bg-yellow-500/20 text-yellow-400";
-    glow = "bg-yellow-500/20";
+    badge = "bg-amber-50 text-amber-600 border border-amber-200";
+    ringColor = "ring-amber-400";
   }
   if (completion < 40) {
     risk = "Critical";
-    badge = "bg-red-500/20 text-red-400";
-    glow = "bg-red-500/20";
+    badge = "bg-red-50 text-red-600 border border-red-200";
+    ringColor = "ring-red-400";
   }
 
   return (
-    <div className="relative rounded-2xl overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm
+                    hover:shadow-md transition-shadow duration-300">
 
-      {/* 🔥 Ambient glow behind panel */}
-      <div className={`absolute -inset-10 blur-3xl ${glow} opacity-40`} />
+      {/* Header */}
+      <div className="flex justify-between items-center mb-8">
+        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${badge}`}>
+          {risk}
+        </span>
 
-      {/* Panel */}
-      <div className="relative rounded-2xl border border-zinc-800 bg-gradient-to-b from-zinc-800/80 to-zinc-900 p-10 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+        <span className="text-sm text-gray-500 font-medium">
+          🔥 Streak: {streak}
+        </span>
+      </div>
 
-        {/* Top edge light */}
-        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-zinc-500 to-transparent" />
+      {/* Main Metric */}
+      <div className="text-center mb-8">
+        <h2 className="text-6xl font-bold tracking-tight text-gray-900">
+          {completion}%
+        </h2>
+        <p className="text-gray-500 mt-1">Today's Completion</p>
+      </div>
 
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <span className={`px-3 py-1 rounded-md text-sm font-medium ${badge}`}>
-            {risk}
-          </span>
-
-          <span className="text-sm text-zinc-400">
-            Streak: {streak}
-          </span>
+      {/* Progress Ring */}
+      <div className="flex justify-center mb-6">
+        <div className={`w-16 h-16 rounded-full ring-4 ${ringColor} ring-offset-4 ring-offset-white
+                        flex items-center justify-center`}>
+          <span className="text-lg font-bold text-gray-900">{completion}%</span>
         </div>
+      </div>
 
-        {/* Main Metric */}
-        <div className="text-center mb-8">
-          <h2 className="text-7xl font-bold tracking-tight">
-            {completion}%
-          </h2>
-          <p className="text-zinc-400">Today Completion</p>
-        </div>
-
-        {/* Button */}
-        <div className="flex justify-center">
-          <button className="px-6 py-2 rounded-lg bg-zinc-800 hover:bg-zinc-700 border border-zinc-700 shadow-inner transition">
-            Review Today’s Plan
-          </button>
-        </div>
+      {/* Button */}
+      <div className="flex justify-center">
+        <button className="px-6 py-2.5 rounded-xl bg-gray-900 hover:bg-gray-800 text-white
+                           text-sm font-medium shadow-sm transition-all duration-200
+                           active:scale-95">
+          Review Today's Plan
+        </button>
       </div>
     </div>
   );

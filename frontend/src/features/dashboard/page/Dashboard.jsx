@@ -43,39 +43,42 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center text-zinc-400">
-        Loading analytics...
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-sm font-medium">Loading analytics…</p>
+        </div>
       </div>
     );
   }
 
   if (!data) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center text-red-400">
+      <div className="flex items-center justify-center py-20 text-red-500">
         Failed to load dashboard data
       </div>
     );
   }
   if (data?.isFirstTimeUser) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-6">
-        <div className="max-w-xl w-full bg-zinc-900 border border-zinc-800 rounded-2xl p-10 text-center space-y-6">
+      <div className="flex items-center justify-center py-20 p-6">
+        <div className="max-w-xl w-full bg-white border border-gray-200 rounded-2xl p-10 text-center space-y-6 shadow-sm">
 
-          <h1 className="text-3xl font-semibold">
-            Welcome, Abhi 👋
+          <h1 className="text-3xl font-semibold text-gray-900">
+            Welcome 👋
           </h1>
 
-          <p className="text-zinc-400">
+          <p className="text-gray-500">
             Let’s create your first journal workspace to start tracking your consistency.
           </p>
 
           <div className="space-y-4">
 
-            <button className="w-full bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg font-medium">
+            <button className="w-full bg-gray-900 hover:bg-gray-800 text-white py-3 rounded-lg font-medium">
               Create Your First Journal
             </button>
 
-            <button className="w-full bg-zinc-800 hover:bg-zinc-700 py-3 rounded-lg">
+            <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 rounded-lg">
               Explore Workspace
             </button>
 
@@ -86,12 +89,12 @@ export default function Dashboard() {
     );
   }
   return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-100 p-6 space-y-6">
+    <div className="space-y-6">
 
       {/* HEADER */}
       <div>
-        <h1 className="text-2xl font-semibold">Good Evening, Abhi</h1>
-        <p className="text-zinc-400 text-sm">{today}</p>
+        <h1 className="text-2xl font-semibold text-gray-900">Good Evening</h1>
+        <p className="text-gray-500 text-sm">{today}</p>
       </div>
 
       {/* STATUS */}
@@ -131,10 +134,7 @@ export default function Dashboard() {
       {/* ANALYTICS */}
       <div className="relative rounded-2xl overflow-hidden">
 
-        {/* Ambient glow */}
-        <div className="absolute -inset-12 bg-emerald-500/10 blur-3xl" />
-
-        <div className="relative bg-gradient-to-b from-zinc-800/80 to-zinc-900 border border-zinc-800 rounded-2xl p-8">
+        <div className="relative bg-white border border-gray-200 rounded-2xl p-8 shadow-sm">
 
           {/* Section header */}
           <div className="flex justify-between items-center mb-8">
@@ -142,7 +142,7 @@ export default function Dashboard() {
               Behavioral Analytics
             </h2>
 
-            <p className="text-sm text-zinc-400">
+            <p className="text-sm text-gray-500">
               Last 30 Days
             </p>
           </div>

@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./ProtectedRoute";
+import MainLayout from "../components/layouts/MainLayout";
 
 import Landing from "../features/Home/page/Landing";
 import Login from "../features/auth/pages/Login";
@@ -21,7 +22,7 @@ export default function AppRoutes() {
     <BrowserRouter>
       <Routes>
 
-        {/* 🌐 Public Routes */}
+        {/* 🌐 Public Routes (no MainLayout — Landing has its own design) */}
         <Route path="/" element={<Landing />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -29,13 +30,15 @@ export default function AppRoutes() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
 
-        {/* 🔒 Protected Routes */}
+        {/* 🔒 Protected Routes — wrapped in MainLayout for navbar */}
 
         <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
-              <Dashboard />
+              <MainLayout>
+                <Dashboard />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -44,7 +47,9 @@ export default function AppRoutes() {
           path="/coach"
           element={
             <ProtectedRoute>
-              <CoachPage />
+              <MainLayout>
+                <CoachPage />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -53,7 +58,9 @@ export default function AppRoutes() {
           path="/workspace"
           element={
             <ProtectedRoute>
-              <WorkspacePage />
+              <MainLayout>
+                <WorkspacePage />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -63,7 +70,9 @@ export default function AppRoutes() {
           path="/journals"
           element={
             <ProtectedRoute>
-              <JournalHomePage />
+              <MainLayout>
+                <JournalHomePage />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
@@ -83,12 +92,14 @@ export default function AppRoutes() {
           path="/templates/:journalId"
           element={
             <ProtectedRoute>
-              <TemplateSelection />
+              <MainLayout>
+                <TemplateSelection />
+              </MainLayout>
             </ProtectedRoute>
           }
         />
 
-        {/* ✏️ Editor by Date */}
+        {/* ✏️ Editor by Date (full-screen, no MainLayout navbar) */}
         <Route
           path="/journals/:journalId/date/:date"
           element={

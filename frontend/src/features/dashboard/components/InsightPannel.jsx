@@ -1,23 +1,26 @@
 export default function PatternInsights() {
   return (
-    <div className="relative rounded-2xl overflow-hidden">
+    <div className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm
+                    hover:shadow-md transition-shadow duration-300">
 
-      {/* subtle background */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-800/80 to-zinc-900" />
+      <h3 className="text-sm font-semibold mb-4 text-gray-900 uppercase tracking-wider">
+        Pattern Insights
+      </h3>
 
-      <div className="relative border border-zinc-800 rounded-2xl p-6">
-
-        <h3 className="text-sm font-semibold mb-4 text-zinc-200">
-          Pattern Insights
-        </h3>
-
-        <ul className="space-y-2 text-zinc-300 text-sm">
-          <li>• Completion drops on Sundays</li>
-          <li>• Morning tasks have 82% success rate</li>
-          <li>• Reflection days increase next-day completion</li>
-        </ul>
-
-      </div>
+      <ul className="space-y-3 text-gray-600 text-sm">
+        <li className="flex items-start gap-2">
+          <span className="text-blue-500 mt-0.5">●</span>
+          Completion drops on Sundays
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-emerald-500 mt-0.5">●</span>
+          Morning tasks have 82% success rate
+        </li>
+        <li className="flex items-start gap-2">
+          <span className="text-purple-500 mt-0.5">●</span>
+          Reflection days increase next-day completion
+        </li>
+      </ul>
     </div>
   );
 }

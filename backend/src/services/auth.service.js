@@ -55,18 +55,16 @@ export async function verifyOtp({ email, otp }) {
 
 
 export async function loginUser({ email, password }) {
+  
   // console.log("email", email , password);
-
+  email = email.toLowerCase().trim();
   const user = await User.findOne({ email }).select("+password");  
+
   console.log("USER:", user);
+  if (!user) throw new Error("Invalid credentials");
   console.log("INPUT PASSWORD:", password);
   console.log("HASHED PASSWORD:", user?.password);
-
-
-  if (!user) throw new Error("Invalid credentials");
   if (!user.isVerified) throw new Error("Email not verified");
-
- 
   const isMatch = await bcrypt.compare(password, user.password);
 console.log(isMatch);
 

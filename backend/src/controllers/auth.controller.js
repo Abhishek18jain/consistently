@@ -35,6 +35,7 @@ export async function verifyEmail(req, res, next) {
 export async function login(req, res, next) {
   try {
     const { email, password } = req.body;
+    console.log(req.body);
 // console.log("email", email , password);
 
     const { token } = await AuthService.loginUser({ email, password });

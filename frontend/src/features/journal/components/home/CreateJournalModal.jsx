@@ -1,5 +1,3 @@
-// features/journal/components/home/CreateJournalModal.jsx
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useCreateJournal from "../../hooks/useCreateJournal";
@@ -21,8 +19,6 @@ export default function CreateJournalModal({
   if (!isOpen) return null;
 
   const handleSubmit = async () => {
-    console.log("Create clicked");
-
     if (!title.trim()) {
       alert("Enter a journal name");
       return;
@@ -42,25 +38,26 @@ export default function CreateJournalModal({
       return;
     }
 
-    console.log("Created journal:", journal);
-
     setJournal(journal);
 
-    // Navigate correctly
-  if (chooseNow) {
-    console.log("Navigating with ID:", journal._id);
-  navigate(`/templates/${journal._id}`);
-} else {
-  navigate(`/journals`);
-}
+    if (chooseNow) {
+      navigate(`/templates/${journal._id}`);
+    } else {
+      navigate(`/journals`);
+    }
 
     onClose();
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
-      <div className="bg-zinc-900 p-6 rounded-xl w-[420px]">
-        <h2 className="text-xl font-semibold mb-4">
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm
+                    flex items-center justify-center p-4
+                    animate-[fadeIn_200ms_ease-out]">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6
+                      border border-gray-200
+                      animate-[slideUp_300ms_ease-out]">
+
+        <h2 className="text-xl font-bold text-gray-900 mb-5">
           Create {presetType} Journal
         </h2>
 
@@ -70,27 +67,32 @@ export default function CreateJournalModal({
           placeholder="Journal name"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full bg-zinc-800 p-3 rounded mb-4"
+          className="w-full bg-gray-50 border border-gray-200 p-3 rounded-xl
+                     text-gray-900 placeholder-gray-400
+                     focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+                     transition-all mb-5"
         />
 
         {/* Template Choice */}
-        <div className="flex items-center gap-3 mb-6">
-          <label className="flex items-center gap-2">
+        <div className="flex items-center gap-4 mb-6">
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
             <input
               type="radio"
               name="templateChoice"
               checked={!chooseNow}
               onChange={() => setChooseNow(false)}
+              className="accent-blue-600"
             />
             Choose later
           </label>
 
-          <label className="flex items-center gap-2">
+          <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
             <input
               type="radio"
               name="templateChoice"
               checked={chooseNow}
               onChange={() => setChooseNow(true)}
+              className="accent-blue-600"
             />
             Choose now
           </label>
@@ -100,7 +102,8 @@ export default function CreateJournalModal({
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-zinc-700 rounded"
+            className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700
+                       rounded-xl text-sm font-medium transition-all duration-200"
             disabled={loading}
           >
             Cancel
@@ -108,7 +111,9 @@ export default function CreateJournalModal({
 
           <button
             onClick={handleSubmit}
-            className="px-4 py-2 bg-blue-600 rounded disabled:opacity-50"
+            className="px-5 py-2.5 bg-gray-900 hover:bg-gray-800 text-white
+                       rounded-xl text-sm font-medium transition-all duration-200
+                       disabled:opacity-50 active:scale-95"
             disabled={loading}
           >
             {loading ? "Creating..." : "Create"}

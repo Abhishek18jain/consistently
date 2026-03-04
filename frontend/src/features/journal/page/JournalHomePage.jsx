@@ -36,10 +36,10 @@ export default function JournalHomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white px-6 py-8">
-      
+    <div className="space-y-8">
+
       {/* ===== HEADER ===== */}
-      <h1 className="text-3xl font-semibold mb-8">
+      <h1 className="text-2xl font-bold text-gray-900">
         Journals
       </h1>
 
@@ -47,9 +47,14 @@ export default function JournalHomePage() {
       <CreatePresetSection onPresetClick={handlePresetClick} />
 
       {/* ===== JOURNAL LIST ===== */}
-      <div className="mt-12">
+      <div>
         {loading ? (
-          <p className="text-zinc-400">Loading journals...</p>
+          <div className="flex items-center justify-center py-12 text-gray-500">
+            <div className="flex flex-col items-center gap-3">
+              <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+              <p className="text-sm font-medium">Loading journals…</p>
+            </div>
+          </div>
         ) : (
           <JournalGrid journals={journals} />
         )}

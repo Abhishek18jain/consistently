@@ -29,11 +29,9 @@ export default function JournalEditorPage() {
 
   const [template, setTemplate] = useState(null);
 
-  /* ⭐ LOAD TEMPLATE AFTER PAGE LOADS */
   useEffect(() => {
     async function loadTemplate() {
       if (!page?.createdFromTemplateId) return;
-
       try {
         const res = await templateApi.getTemplateById(
           page.createdFromTemplateId
@@ -43,16 +41,15 @@ export default function JournalEditorPage() {
         console.error("Template load failed:", err);
       }
     }
-
     loadTemplate();
   }, [page]);
 
   if (!page)
     return (
-      <div className="min-h-screen flex items-center justify-center bg-zinc-900">
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
         <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-3 border-zinc-700 border-t-blue-500 rounded-full animate-spin" />
-          <p className="text-sm text-zinc-400 font-medium">Loading editor…</p>
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 font-medium">Loading editor…</p>
         </div>
       </div>
     );
@@ -60,18 +57,18 @@ export default function JournalEditorPage() {
   const showCompletion = completion && !completion.excluded;
 
   return (
-    <div className="min-h-screen bg-zinc-900 pb-24">
+    <div className="min-h-screen bg-gray-100 pb-24">
 
       {/* ── HEADER BAR ── */}
-      <div className="sticky top-0 z-40 bg-zinc-900/80 backdrop-blur-md border-b border-zinc-800">
+      <div className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-gray-200/60">
         <div className="max-w-2xl mx-auto px-4 py-3 flex items-center justify-between">
 
           {/* ← Previous */}
           <button
             onClick={goPrevious}
             className="w-9 h-9 rounded-full flex items-center justify-center
-                       text-zinc-400 hover:bg-zinc-800 active:scale-95
-                       transition-all"
+                       text-gray-400 hover:bg-gray-100 active:scale-90
+                       transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="15 18 9 12 15 6" />
@@ -80,27 +77,27 @@ export default function JournalEditorPage() {
 
           {/* Date + Completion Badge */}
           <div className="text-center">
-            <p className="text-sm font-semibold text-zinc-100">
+            <p className="text-sm font-semibold text-gray-900">
               {formatDate(date)}
             </p>
             {showCompletion && (
               <div className="flex items-center justify-center gap-1.5 mt-0.5">
-                <div className="w-14 h-1.5 bg-zinc-700 rounded-full overflow-hidden">
+                <div className="w-14 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full transition-all duration-500 ${completion.completion >= 70
-                        ? "bg-emerald-500"
-                        : completion.completion >= 50
-                          ? "bg-amber-500"
-                          : "bg-red-400"
+                      ? "bg-emerald-500"
+                      : completion.completion >= 50
+                        ? "bg-amber-500"
+                        : "bg-red-400"
                       }`}
                     style={{ width: `${completion.completion}%` }}
                   />
                 </div>
                 <span className={`text-[10px] font-bold tabular-nums ${completion.completion >= 70
-                    ? "text-emerald-400"
-                    : completion.completion >= 50
-                      ? "text-amber-400"
-                      : "text-red-400"
+                  ? "text-emerald-600"
+                  : completion.completion >= 50
+                    ? "text-amber-600"
+                    : "text-red-500"
                   }`}>
                   {completion.completion}%
                 </span>
@@ -112,8 +109,8 @@ export default function JournalEditorPage() {
           <button
             onClick={goNext}
             className="w-9 h-9 rounded-full flex items-center justify-center
-                       text-zinc-400 hover:bg-zinc-800 active:scale-95
-                       transition-all"
+                       text-gray-400 hover:bg-gray-100 active:scale-90
+                       transition-all duration-200"
           >
             <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="9 18 15 12 9 6" />
@@ -122,15 +119,16 @@ export default function JournalEditorPage() {
         </div>
       </div>
 
-      {/* ── STREAK BANNER (after saving with streak data) ── */}
+      {/* ── STREAK BANNER ── */}
       {streak && streak.status === "success" && streak.currentStreak > 0 && (
         <div className="max-w-2xl mx-auto px-4 mt-3">
-          <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-xl px-4 py-2.5 flex items-center justify-between">
-            <span className="text-sm font-medium text-emerald-400">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-2.5
+                          flex items-center justify-between">
+            <span className="text-sm font-medium text-emerald-600">
               🔥 {streak.currentStreak} Day Streak
             </span>
             {streak.bestStreak && streak.currentStreak === streak.bestStreak && (
-              <span className="text-[10px] font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-full">
+              <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                 🏆 Personal Best!
               </span>
             )}
@@ -148,7 +146,7 @@ export default function JournalEditorPage() {
         />
       </div>
 
-      {/* ── SAVE BUTTON (bottom center) ── */}
+      {/* ── SAVE BUTTON ── */}
       <SavingIndicator isSaving={isSaving} onSave={save} />
     </div>
   );

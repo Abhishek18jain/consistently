@@ -2,13 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import api from "../../../services/axios";
 
 const ALL_OPTIONS = [
-  { label: "Am I at Risk?", key: "RISK_TODAY", emoji: "⚠️", color: "text-red-400" },
-  { label: "Task Analysis", key: "TASK_INSIGHTS", emoji: "📋", color: "text-blue-400" },
-  { label: "What To Adjust", key: "WHAT_TO_ADJUST", emoji: "🔧", color: "text-amber-400" },
-  { label: "Weak Days", key: "WEEK_DAYS", emoji: "📊", color: "text-purple-400" },
-  { label: "Why Streak Broke", key: "WHY_STREAK_BROKE", emoji: "💔", color: "text-rose-400" },
-  { label: "Weekly Summary", key: "SUMMARY", emoji: "📈", color: "text-emerald-400" },
-  { label: "Full Report", key: "FULL_REPORT", emoji: "📊", color: "text-cyan-400" },
+  { label: "Am I at Risk?", key: "RISK_TODAY", emoji: "⚠️", color: "text-red-500" },
+  { label: "Task Analysis", key: "TASK_INSIGHTS", emoji: "📋", color: "text-blue-500" },
+  { label: "What To Adjust", key: "WHAT_TO_ADJUST", emoji: "🔧", color: "text-amber-500" },
+  { label: "Weak Days", key: "WEEK_DAYS", emoji: "📊", color: "text-purple-500" },
+  { label: "Why Streak Broke", key: "WHY_STREAK_BROKE", emoji: "💔", color: "text-rose-500" },
+  { label: "Weekly Summary", key: "SUMMARY", emoji: "📈", color: "text-emerald-500" },
+  { label: "Full Report", key: "FULL_REPORT", emoji: "📊", color: "text-cyan-500" },
 ];
 
 export default function GuidedCoachScreen() {
@@ -37,8 +37,6 @@ export default function GuidedCoachScreen() {
     try {
       const res = await api.get(`/coach/${opt.key}`);
       const data = res.data;
-
-      // Format response based on question type
       const formatted = formatCoachResponse(opt.key, data);
 
       setMessages((prev) => [
@@ -56,33 +54,33 @@ export default function GuidedCoachScreen() {
   }
 
   return (
-    <div className="h-screen bg-zinc-900 text-white flex flex-col">
+    <div className="flex flex-col" style={{ height: "calc(100vh - 56px)" }}>
 
       {/* HEADER */}
-      <div className="p-4 border-b border-zinc-800 bg-zinc-900/80 backdrop-blur">
+      <div className="px-4 py-3 bg-white border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
             <span className="text-xl">🧠</span>
           </div>
           <div>
-            <h2 className="font-semibold text-zinc-100">Consistency Coach</h2>
-            <p className="text-xs text-zinc-500">Powered by your real journal data</p>
+            <h2 className="font-semibold text-gray-900">Consistency Coach</h2>
+            <p className="text-xs text-gray-400">Powered by your real journal data</p>
           </div>
         </div>
       </div>
 
       {/* CHAT */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((m, i) => (
           <MessageBubble key={i} m={m} />
         ))}
 
         {loading && (
-          <div className="flex items-center gap-2 text-zinc-400 text-sm">
+          <div className="flex items-center gap-2 text-gray-400 text-sm">
             <div className="flex gap-1">
-              <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-              <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-              <span className="w-2 h-2 bg-zinc-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+              <span className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
             </div>
             Analyzing your data...
           </div>
@@ -90,8 +88,8 @@ export default function GuidedCoachScreen() {
 
         {/* REMAINING QUESTIONS */}
         {remaining.length > 0 && !loading && (
-          <div className="bg-zinc-800/60 rounded-2xl p-4 border border-zinc-700/50">
-            <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-3">
+          <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+            <p className="text-xs text-gray-400 uppercase tracking-wider font-medium mb-3">
               Ask me about
             </p>
 
@@ -100,10 +98,10 @@ export default function GuidedCoachScreen() {
                 <button
                   key={opt.key}
                   onClick={() => handleQuestion(opt)}
-                  className="flex items-center gap-1.5 px-4 py-2 bg-zinc-700/60
-                             hover:bg-zinc-700 rounded-full text-sm font-medium
-                             text-zinc-300 hover:text-zinc-100 transition-all
-                             active:scale-95 border border-zinc-600/30"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-gray-50
+                             hover:bg-gray-100 rounded-full text-sm font-medium
+                             text-gray-700 hover:text-gray-900 transition-all duration-200
+                             active:scale-95 border border-gray-200"
                 >
                   <span>{opt.emoji}</span>
                   {opt.label}
@@ -116,11 +114,11 @@ export default function GuidedCoachScreen() {
         {/* ALL DONE */}
         {remaining.length === 0 && !loading && (
           <div className="text-center py-6">
-            <div className="w-12 h-12 mx-auto bg-emerald-500/10 rounded-full flex items-center justify-center mb-3">
+            <div className="w-12 h-12 mx-auto bg-emerald-50 rounded-full flex items-center justify-center mb-3">
               <span className="text-2xl">🎯</span>
             </div>
-            <p className="text-emerald-400 font-medium">You're all caught up for today!</p>
-            <p className="text-xs text-zinc-500 mt-1">Come back tomorrow for updated insights.</p>
+            <p className="text-emerald-600 font-medium">You're all caught up for today!</p>
+            <p className="text-xs text-gray-400 mt-1">Come back tomorrow for updated insights.</p>
           </div>
         )}
 
@@ -130,9 +128,6 @@ export default function GuidedCoachScreen() {
   );
 }
 
-/**
- * Format coach response based on question type
- */
 function formatCoachResponse(questionKey, data) {
   const title = data.title || "";
   const insight = data.insight || "";
@@ -223,9 +218,6 @@ function formatCoachResponse(questionKey, data) {
   return { text, richData };
 }
 
-/**
- * Enhanced message bubble with rich data
- */
 function MessageBubble({ m }) {
   const user = m.type === "user";
 
@@ -235,8 +227,8 @@ function MessageBubble({ m }) {
         <div
           className={`px-4 py-3 rounded-2xl whitespace-pre-line text-sm leading-relaxed
           ${user
-              ? "bg-emerald-600 text-white rounded-br-sm"
-              : "bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-bl-sm"
+              ? "bg-gray-900 text-white rounded-br-sm"
+              : "bg-white border border-gray-200 text-gray-700 rounded-bl-sm shadow-sm"
             }`}
         >
           {m.text}
@@ -248,34 +240,34 @@ function MessageBubble({ m }) {
             {m.richData.items.map((item, i) => (
               <div
                 key={i}
-                className="bg-zinc-800/60 rounded-xl px-3 py-2.5 border border-zinc-700/40"
+                className="bg-white rounded-xl px-3 py-2.5 border border-gray-200 shadow-sm"
               >
-                <p className="text-[10px] text-zinc-500 uppercase tracking-wider">{item.label}</p>
-                <p className="text-sm font-bold text-zinc-100 mt-0.5">{item.value}</p>
+                <p className="text-[10px] text-gray-400 uppercase tracking-wider">{item.label}</p>
+                <p className="text-sm font-bold text-gray-900 mt-0.5">{item.value}</p>
               </div>
             ))}
           </div>
         )}
 
-        {/* Day Chart (for WEEK_DAYS) */}
+        {/* Day Chart */}
         {m.richData?.type === "dayChart" && (
-          <div className="bg-zinc-800/60 rounded-xl p-3 border border-zinc-700/40">
+          <div className="bg-white rounded-xl p-3 border border-gray-200 shadow-sm">
             <div className="flex items-end justify-between gap-1 h-20">
               {m.richData.days.map((day, i) => (
                 <div key={i} className="flex-1 flex flex-col items-center gap-1">
                   <div
                     className={`w-full rounded-t transition-all ${day.rate >= 70
-                        ? "bg-emerald-500"
-                        : day.rate >= 50
-                          ? "bg-amber-500"
-                          : "bg-red-400"
+                      ? "bg-emerald-500"
+                      : day.rate >= 50
+                        ? "bg-amber-500"
+                        : "bg-red-400"
                       }`}
                     style={{
                       height: `${Math.max(day.rate, 5)}%`,
                       minHeight: "4px",
                     }}
                   />
-                  <span className="text-[9px] text-zinc-500 font-medium">
+                  <span className="text-[9px] text-gray-400 font-medium">
                     {day.dayName.slice(0, 3)}
                   </span>
                 </div>

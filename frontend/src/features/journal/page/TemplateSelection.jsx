@@ -17,17 +17,13 @@ export default function TemplateSelectionPage() {
   useEffect(() => {
     async function loadTemplates() {
       try {
-        const journalRes =
-          await journalApi.getJournalById(journalId);
-
+        const journalRes = await journalApi.getJournalById(journalId);
         const journalData = journalRes.data;
         setJournal(journalData);
 
-        const templateRes =
-          await templateApi.getTemplatesByType(
-            journalData.journalType
-          );
-
+        const templateRes = await templateApi.getTemplatesByType(
+          journalData.journalType
+        );
         setTemplates(templateRes.data);
       } catch (err) {
         console.error("Template load failed:", err);
@@ -41,14 +37,8 @@ export default function TemplateSelectionPage() {
 
   async function handleSelect(templateId) {
     try {
-      const res =
-        await pageApi.createFromTemplate(
-          journalId,
-          templateId
-        );
-
+      const res = await pageApi.createFromTemplate(journalId, templateId);
       const page = res.data;
-
       navigate(
         `/journals/${journalId}/date/${page.date}`,
         { replace: true }
@@ -58,62 +48,54 @@ export default function TemplateSelectionPage() {
     }
   }
 
-  /* 🧠 Loading State */
   if (loading)
     return (
-      <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center">
-        <div className="animate-pulse text-lg text-zinc-400">
-          Loading templates...
+      <div className="flex items-center justify-center py-20">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-sm text-gray-500 font-medium">Loading templates…</p>
         </div>
       </div>
     );
 
   if (!journal)
     return (
-      <div className="min-h-screen bg-zinc-900 text-white flex items-center justify-center">
+      <div className="flex items-center justify-center py-20 text-gray-500">
         Journal not found
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-zinc-900 text-white">
+    <div>
+      {/* Header */}
+      <div className="text-center mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900">
+          Start your{" "}
+          <span className="text-blue-600">
+            {journal.journalType}
+          </span>{" "}
+          journal
+        </h1>
 
-      {/* 🌌 Gradient Glow */}
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-600/10 via-transparent to-transparent pointer-events-none" />
-
-      {/* 🧠 Container */}
-      <div className="relative max-w-6xl mx-auto px-6 py-16">
-
-        {/* 🏆 Header */}
-        <div className="text-center mb-14">
-
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Start your{" "}
-            <span className="text-indigo-400">
-              {journal.journalType}
-            </span>{" "}
-            journal
-          </h1>
-
-          <p className="text-zinc-400 mt-4 max-w-xl mx-auto">
-            Choose a template to generate your first page.
-            You can always change structure later.
-          </p>
-        </div>
-
-        {/* 🧱 Template Grid */}
-        {templates.length === 0 ? (
-          <div className="text-center text-zinc-400 py-20">
-            No templates available for this journal type.
-          </div>
-        ) : (
-          <TemplateGrid
-            templates={templates}
-            onSelect={handleSelect}
-          />
-        )}
-
+        <p className="text-gray-500 mt-3 max-w-xl mx-auto">
+          Choose a template to generate your first page.
+          You can always change structure later.
+        </p>
       </div>
+
+      {/* Template Grid */}
+      {templates.length === 0 ? (
+        <div className="text-center text-gray-400 py-20 bg-white rounded-2xl
+                        border border-gray-200 shadow-sm">
+          <span className="text-3xl mb-2 block">📄</span>
+          No templates available for this journal type.
+        </div>
+      ) : (
+        <TemplateGrid
+          templates={templates}
+          onSelect={handleSelect}
+        />
+      )}
     </div>
   );
 }

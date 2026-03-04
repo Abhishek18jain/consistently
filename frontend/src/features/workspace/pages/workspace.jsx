@@ -1,4 +1,3 @@
-import TopNav from "../components/TopNav";
 import HeroStrip from "../components/Hero";
 import MainActions from "../components/PrimaryActionCard";
 import QuickStats from "../components/QuickStats";
@@ -9,20 +8,20 @@ export default function WorkspacePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-zinc-900 flex items-center justify-center text-zinc-400">
-        Loading workspace...
+      <div className="flex items-center justify-center py-20 text-gray-500">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-3 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+          <p className="text-sm font-medium">Loading workspace…</p>
+        </div>
       </div>
     );
   }
-  return (
-    <div className="min-h-screen bg-zinc-900 text-zinc-200">
-      <TopNav />
 
-      <main className="max-w-7xl mx-auto px-6 py-8 space-y-10">
-        <HeroStrip status={status} />
-        <MainActions status={status} />
-        <QuickStats status={status} />
-      </main>
+  return (
+    <div className="space-y-8">
+      <HeroStrip status={status} />
+      <MainActions status={status} />
+      <QuickStats status={status} />
     </div>
   );
 }

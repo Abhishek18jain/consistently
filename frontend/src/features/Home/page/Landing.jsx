@@ -24,63 +24,63 @@ export default function LandingPage() {
     <div className="relative bg-zinc-950 text-zinc-100 overflow-hidden">
       <LandingBackground />
       <Navbar />
-{/* HERO */}
-<section className="relative max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-20 items-center">
+      {/* HERO */}
+      <section className="relative max-w-7xl mx-auto px-6 py-20 grid lg:grid-cols-2 gap-20 items-center">
 
-  {/* Gradient spotlight */}
-  <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.15),transparent_40%)]" />
+        {/* Gradient spotlight */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.15),transparent_40%)]" />
 
-  {/* LEFT */}
-  <div className="relative">
-    <h1 className="text-6xl font-bold leading-tight mb-6 tracking-tight">
-      Your Discipline,
-      <br />
-      Quantified.
-    </h1>
+        {/* LEFT */}
+        <div className="relative">
+          <h1 className="text-6xl font-bold leading-tight mb-6 tracking-tight">
+            Your Discipline,
+            <br />
+            Quantified.
+          </h1>
 
-    <p className="text-zinc-400 mb-8 text-lg max-w-xl">
-      AI-powered behavioral analytics that detect execution decline —
-      before your streak collapses.
-    </p>
+          <p className="text-zinc-400 mb-8 text-lg max-w-xl">
+            AI-powered behavioral analytics that detect execution decline —
+            before your streak collapses.
+          </p>
 
-    {/* Feature bullets */}
-    <ul className="space-y-3 mb-10 text-zinc-300">
-      <li>✔ Detect discipline decline patterns</li>
-      <li>✔ Track streak stability in real time</li>
-      <li>✔ Behavioral insights, not motivation quotes</li>
-    </ul>
+          {/* Feature bullets */}
+          <ul className="space-y-3 mb-10 text-zinc-300">
+            <li>✔ Detect discipline decline patterns</li>
+            <li>✔ Track streak stability in real time</li>
+            <li>✔ Behavioral insights, not motivation quotes</li>
+          </ul>
 
-    <div className="flex gap-4 mb-6">
-      
-     <Link to="/register" className="bg-emerald-600 hover:bg-emerald-500 px-8 py-4 rounded-xl font-medium shadow-lg shadow-emerald-900/30">
-            Start Free
-          </Link>
-      
-      <Link to ="#problem" className="border border-zinc-700 hover:border-zinc-500 px-8 py-4 rounded-xl" >See How It Works</Link>
-    
-    </div>
+          <div className="flex gap-4 mb-6">
 
-    <p className="text-xs text-zinc-500">
-      Trusted by 12,000+ students & professionals
-    </p>
-  </div>
+            <Link to="/register" className="bg-emerald-600 hover:bg-emerald-500 px-8 py-4 rounded-xl font-medium shadow-lg shadow-emerald-900/30">
+              Start Free
+            </Link>
 
-  {/* RIGHT — System UI */}
-  <div className="relative">
-    <BehavioralPanel data={chartData} />
+            <Link to="#problem" className="border border-zinc-700 hover:border-zinc-500 px-8 py-4 rounded-xl" >See How It Works</Link>
 
-    {/* Floating mini card bottom */}
-    <div className="absolute -bottom-10 -left-10 bg-zinc-900 border border-zinc-800 rounded-xl p-4 shadow-xl">
-      <p className="text-xs text-zinc-400">Today’s Execution</p>
-      <h4 className="text-2xl font-bold text-emerald-400">78%</h4>
-    </div>
-  </div>
-</section>
+          </div>
 
-       
+          <p className="text-xs text-zinc-500">
+            Trusted by 12,000+ students & professionals
+          </p>
+        </div>
+
+        {/* RIGHT — System UI */}
+        <div className="relative">
+          <BehavioralPanel data={chartData} />
+
+          {/* Floating mini card bottom */}
+          <div className="absolute -bottom-10 -left-10 bg-zinc-900 border border-zinc-800 rounded-xl p-4 shadow-xl">
+            <p className="text-xs text-zinc-400">Today’s Execution</p>
+            <h4 className="text-2xl font-bold text-emerald-400">78%</h4>
+          </div>
+        </div>
+      </section>
+
+
       {/* PROBLEM */}
       <section id="problem" className="max-w-7xl mx-auto px-6">
-      <FailureSignalsSection></FailureSignalsSection>
+        <FailureSignalsSection></FailureSignalsSection>
       </section>
 
       {/* EXECUTION ENGINE */}
@@ -103,25 +103,25 @@ export default function LandingPage() {
 
         <div className="relative">
           <div className="absolute -inset-10 bg-emerald-500/10 blur-3xl rounded-full" />
-       <ProductPreviewPanel></ProductPreviewPanel>
+          <ProductPreviewPanel></ProductPreviewPanel>
         </div>
       </section>
 
       {/* CONSISTENCY PROFILE */}
-     <section id="profile" className="max-w-7xl mx-auto px-6 py-10">
-  <div className="text-center mb-16">
-    <h2 className="text-5xl font-bold mb-4">
-      Your Consistency Profile
-    </h2>
+      <section id="profile" className="max-w-7xl mx-auto px-6 py-10">
+        <div className="text-center mb-16">
+          <h2 className="text-5xl font-bold mb-4">
+            Your Consistency Profile
+          </h2>
 
-    <p className="text-zinc-400 max-w-2xl mx-auto">
-      AI-generated behavioral analysis of how you execute over time —
-      identifying strengths, risks, and hidden patterns.
-    </p>
-  </div>
+          <p className="text-zinc-400 max-w-2xl mx-auto">
+            AI-generated behavioral analysis of how you execute over time —
+            identifying strengths, risks, and hidden patterns.
+          </p>
+        </div>
 
-  <ConsistencyProfilePanel data={chartData} />
-</section>
+        <ConsistencyProfilePanel data={chartData} />
+      </section>
       {/* ENGINE PIPELINE */}
       <section id="how">
         <ConsistencyEngineSection />
@@ -134,9 +134,9 @@ export default function LandingPage() {
             Stop Guessing. Start Measuring.
           </h2>
 
-          <Link to="register" className="bg-emerald-600 hover:bg-emerald-500 px-12 py-5 rounded-xl font-medium text-lg shadow-lg shadow-emerald-900/30"> Build Real Consistency</Link>
-           
-         
+          <Link to="/register" className="bg-emerald-600 hover:bg-emerald-500 px-12 py-5 rounded-xl font-medium text-lg shadow-lg shadow-emerald-900/30"> Build Real Consistency</Link>
+
+
         </div>
       </section>
     </div>

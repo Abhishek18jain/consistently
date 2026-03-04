@@ -42,141 +42,125 @@ export default function Register() {
     dispatch(registerUser(form));
   };
 
-  /* ================= EFFECTS ================= */
-
   useEffect(() => {
     if (error) {
       toast.error(error);
       dispatch(clearAuthError());
     }
-  }, [error]);
+  }, [error, dispatch]);
 
-
-useEffect(() => {
-  if (registerSuccess) {
-    toast.success("OTP sent to your email");
-    navigate(`/verify-email?email=${form.email}`);
-    // dispatch(clearRegisterSuccess()); // ⭐ IMPORTANT
-  }
-}, [registerSuccess]);
-
-  /* ================= UI ================= */
+  useEffect(() => {
+    if (registerSuccess) {
+      toast.success("OTP sent to your email");
+      navigate(`/verify-email?email=${form.email}`);
+    }
+  }, [registerSuccess, form.email, navigate]);
 
   return (
-   <AuthLayout>
-  <div className="w-full max-w-md text-white">
+    <AuthLayout>
+      <div className="w-full max-w-md">
 
-    {/* HEADER */}
-    <div className="mb-8 text-center">
-      <h2 className="text-2xl font-semibold tracking-tight">
-        Create your account
-      </h2>
-      <p className="text-sm text-gray-400 mt-2">
-        Start building consistency today
-      </p>
-    </div>
+        {/* HEADER */}
+        <div className="mb-8 text-center">
+          <h2 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Create your account
+          </h2>
+          <p className="text-sm text-gray-500 mt-2">
+            Start building consistency today
+          </p>
+        </div>
 
-    <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
 
-      <Input label="Name" name="name" onChange={handleChange} />
+          <Input label="Name" name="name" onChange={handleChange} />
+          <Input label="Email" name="email" type="email" onChange={handleChange} />
 
-      <Input label="Email" name="email" type="email" onChange={handleChange} />
+          {/* PASSWORD */}
+          <div className="relative">
+            <Input
+              label="Password"
+              name="password"
+              type={showPassword ? "text" : "password"}
+              onChange={handleChange}
+            />
 
-      {/* PASSWORD FIELD */}
-      <div className="relative">
-        <Input
-          label="Password"
-          name="password"
-          type={showPassword ? "text" : "password"}
-          onChange={handleChange}
-        />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-9 text-gray-400 hover:text-gray-600
+                         transition-colors"
+            >
+              {showPassword ? "🙈" : "👁"}
+            </button>
 
-        {/* Eye Toggle */}
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-9 text-gray-400 hover:text-white"
-        >
-          👁
-        </button>
+            <PasswordStrength password={form.password} />
+          </div>
 
-        <PasswordStrength password={form.password} />
-      </div>
+          <Input
+            label="Confirm Password"
+            name="confirmPassword"
+            type={showPassword ? "text" : "password"}
+            onChange={handleChange}
+          />
 
-      <Input
-        label="Confirm Password"
-        name="confirmPassword"
-        type={showPassword ? "text" : "password"}
-        onChange={handleChange}
-      />
-
-      {/* CTA BUTTON */}
-      <button
-        disabled={loading}
-        className="
-        w-full py-3 rounded-lg font-semibold
-        bg-gradient-to-r from-blue-600 to-indigo-600
-        hover:from-blue-500 hover:to-indigo-500
-        shadow-lg shadow-blue-500/30
-        transition
-        disabled:opacity-50
-        flex items-center justify-center
-        "
-      >
-        {loading ? (
-          <span className="flex items-center gap-2">
-            <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
-            Creating account...
-          </span>
-        ) : (
-          "Create Account"
-        )}
-      </button>
-
-      {/* DIVIDER */}
-      <div className="border-t border-white/10 pt-4">
-
-        <p className="text-center text-sm text-gray-400">
-          Already have an account?{" "}
-          <span
-            onClick={() => navigate("/login")}
-            className="text-blue-400 hover:text-blue-300 cursor-pointer font-medium"
+          {/* CTA BUTTON */}
+          <button
+            disabled={loading}
+            className="
+              w-full py-3 rounded-xl font-semibold
+              bg-gray-900 hover:bg-gray-800 text-white
+              transition-all duration-200 active:scale-[0.98]
+              disabled:opacity-50
+              flex items-center justify-center
+            "
           >
-            Log in
-          </span>
-        </p>
+            {loading ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                Creating account...
+              </span>
+            ) : (
+              "Create Account"
+            )}
+          </button>
 
+          {/* DIVIDER */}
+          <div className="border-t border-gray-200 pt-4">
+            <p className="text-center text-sm text-gray-500">
+              Already have an account?{" "}
+              <span
+                onClick={() => navigate("/login")}
+                className="text-blue-600 hover:text-blue-700 cursor-pointer font-medium
+                           transition-colors"
+              >
+                Log in
+              </span>
+            </p>
+          </div>
+
+        </form>
       </div>
-
-    </form>
-  </div>
-</AuthLayout>
-
+    </AuthLayout>
   );
 }
-
-/* ================= INPUT ================= */
 
 function Input({ label, ...props }) {
   return (
     <div>
-      <label className="block mb-1 text-sm text-gray-400">
+      <label className="block mb-1.5 text-sm font-medium text-gray-700">
         {label}
       </label>
 
       <input
         {...props}
         className="
-        w-full px-4 py-2.5 rounded-lg
-        bg-[#020617]/70
-        border border-white/10
-        text-white
-        focus:outline-none
-        focus:ring-2 focus:ring-blue-500/40
-        transition
+          w-full px-4 py-2.5 rounded-xl
+          bg-gray-50 border border-gray-200
+          text-gray-900 placeholder-gray-400
+          focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent
+          transition-all duration-200
         "
       />
     </div>
   );
 }
-
