@@ -24,4 +24,12 @@ export const pageApi = {
       journalId,
       templateId,
     }),
+
+  /* GET LATEST PAGE */
+  getLatestPage: (journalId) =>
+    api.get(`/pages/${journalId}/latest`),
+
+  /* DELETE PAGE */
+  deletePage: (pageId) =>
+    api.delete(`/pages/${pageId}`),
 };

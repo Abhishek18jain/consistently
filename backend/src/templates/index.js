@@ -25,8 +25,49 @@ export const templates = [
     tags: ["energy", "planning"],
     blocks: [{ type: "energySections" }]
   },
+  {
+    name: "Daily Planner",
+    type: "todo",
+    description: "Organize your day with schedule and priorities",
+    thumbnail: "/templates/daily.png",
+    tags: ["daily", "schedule"],
+    blocks: [
+      { type: "dailyPlanner" }
+    ]
+  },
+  {
+    name: "Goal Planner",
+    type: "todo",
+    description: "Multi-step goal tracking and progress",
+    thumbnail: "/templates/goal.png",
+    tags: ["goals", "planning"],
+    blocks: [
+      { type: "goalPlanner" }
+    ]
+  },
+  {
+    name: "Daily Planner Productive",
+    type: "todo",
+    description: "Priorities, schedule, notes and reflection for a productive day",
+    thumbnail: "/templates/daily-productive.png",
+    tags: ["daily", "productivity", "schedule"],
+    blocks: [
+      { type: "dailyProductive" }
+    ]
+  },
+  {
+    name: "Time Blocking Planner",
+    type: "todo",
+    description: "Block out time chunks on a visual timeline",
+    thumbnail: "/templates/time-blocking.png",
+    tags: ["time", "focus", "blocking"],
+    blocks: [
+      { type: "timeBlocking" }
+    ]
+  },
 
   // ===== PLANNER =====
+
   {
     name: "Habit Tracker",
     type: "planner",

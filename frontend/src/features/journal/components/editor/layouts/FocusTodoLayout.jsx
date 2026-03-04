@@ -1,259 +1,225 @@
-import { useMemo, useState } from "react";
+import { useState, useEffect } from "react";
 
 /**
- * Focus Mode Todo Layout — fully dark theme
+ * Focus Mode Todo Layout — Light theme matching general aesthetic
+ * Structural design inspired by Focus Mode Todo mockup.
  */
 
-const PRIORITY_LEVELS = [
-    {
-        label: "Must Do",
-        emoji: "🎯",
-        bg: "bg-red-500/10",
-        border: "border-red-500/30",
-        labelColor: "text-red-400",
-        checkColor: "bg-red-500 border-red-500",
-        tagBg: "bg-red-500/20 text-red-400",
-    },
-    {
-        label: "Should Do",
-        emoji: "📌",
-        bg: "bg-amber-500/10",
-        border: "border-amber-500/30",
-        labelColor: "text-amber-400",
-        checkColor: "bg-amber-500 border-amber-500",
-        tagBg: "bg-amber-500/20 text-amber-400",
-    },
-    {
-        label: "Could Do",
-        emoji: "💡",
-        bg: "bg-blue-500/10",
-        border: "border-blue-500/30",
-        labelColor: "text-blue-400",
-        checkColor: "bg-blue-500 border-blue-500",
-        tagBg: "bg-blue-500/20 text-blue-400",
-    },
-];
-
-function parsePriorities(blocks) {
-    const priorities = [];
-    let current = null;
-
-    for (const block of blocks) {
-        if (block.type === "text") {
-            if (current) priorities.push(current);
-            current = { title: block.data?.text || "", items: [], titleBlockId: block.id };
-        } else if (block.type === "checklist" && current) {
-            current.items = (block.data?.items || []).map((item) =>
-                typeof item === "string"
-                    ? { text: item, checked: false }
-                    : { text: item.text || "", checked: !!item.checked }
-            );
-            current.checklistBlockId = block.id;
-        }
-    }
-    if (current) priorities.push(current);
-
-    while (priorities.length < 3) {
-        priorities.push({
-            title: PRIORITY_LEVELS[priorities.length]?.label || "",
-            items: [],
-        });
-    }
-
-    return priorities.slice(0, 3);
-}
-
 export default function FocusTodoLayout({ template, blocks, setBlocks }) {
-    const priorities = parsePriorities(blocks);
-    const [focusMinutes, setFocusMinutes] = useState(25);
-    const [isTimerActive, setIsTimerActive] = useState(false);
+    const textBlocks = blocks.filter((b) => b.type === "text");
+    const checklistBlock = blocks.find((b) => b.type === "checklist");
 
-    const updatePriorityItems = (prIdx, newItems) => {
-        const pr = priorities[prIdx];
-        if (!pr?.checklistBlockId) return;
+    const titleBlock = textBlocks[0] || null;
+    const items = checklistBlock?.data?.items || [];
+
+    const [timeLeft, setTimeLeft] = useState(25 * 60); // 25 minutes in seconds
+    const [isActive, setIsActive] = useState(false);
+    const [distractionBlocker, setDistractionBlocker] = useState(true);
+
+    useEffect(() => {
+        let interval = null;
+        if (isActive && timeLeft > 0) {
+            interval = setInterval(() => {
+                setTimeLeft((time) => time - 1);
+            }, 1000);
+        } else if (timeLeft === 0) {
+            setIsActive(false);
+        }
+        return () => clearInterval(interval);
+    }, [isActive, timeLeft]);
+
+    const toggleTimer = () => setIsActive(!isActive);
+
+    const formatTime = (seconds) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
+    };
+
+    const updateBlock = (blockId, newData) => {
         setBlocks((prev) =>
-            prev.map((b) =>
-                b.id === pr.checklistBlockId
-                    ? { ...b, data: { items: newItems } }
-                    : b
-            )
+            prev.map((b) => (b.id === blockId ? { ...b, data: newData } : b))
         );
     };
 
-    const toggleItem = (prIdx, itemIdx) => {
-        const items = [...priorities[prIdx].items];
-        items[itemIdx] = { ...items[itemIdx], checked: !items[itemIdx].checked };
-        updatePriorityItems(prIdx, items);
+    const toggleItem = (idx) => {
+        if (!checklistBlock) return;
+        const newItems = [...items];
+        if (typeof newItems[idx] === "string") {
+            newItems[idx] = { text: newItems[idx], checked: true };
+        } else {
+            newItems[idx] = { ...newItems[idx], checked: !newItems[idx].checked };
+        }
+        updateBlock(checklistBlock.id, { items: newItems });
     };
 
-    const updateItemText = (prIdx, itemIdx, text) => {
-        const items = [...priorities[prIdx].items];
-        items[itemIdx] = { ...items[itemIdx], text };
-        updatePriorityItems(prIdx, items);
+    const updateItemText = (idx, text) => {
+        if (!checklistBlock) return;
+        const newItems = [...items];
+        if (typeof newItems[idx] === "string") {
+            newItems[idx] = { text, checked: false };
+        } else {
+            newItems[idx] = { ...newItems[idx], text };
+        }
+        updateBlock(checklistBlock.id, { items: newItems });
     };
 
-    const addItem = (prIdx) => {
-        const items = [...priorities[prIdx].items, { text: "", checked: false }];
-        updatePriorityItems(prIdx, items);
+    const addItem = () => {
+        if (!checklistBlock) return;
+        updateBlock(checklistBlock.id, { items: [...items, { text: "", checked: false }] });
     };
 
-    const removeItem = (prIdx, itemIdx) => {
-        const items = priorities[prIdx].items.filter((_, i) => i !== itemIdx);
-        updatePriorityItems(prIdx, items);
+    const removeItem = (idx) => {
+        if (!checklistBlock) return;
+        updateBlock(checklistBlock.id, { items: items.filter((_, i) => i !== idx) });
     };
 
-    const totalTasks = priorities.reduce((sum, p) => sum + p.items.length, 0);
-    const completedTasks = priorities.reduce((sum, p) => sum + p.items.filter(i => i.checked).length, 0);
-    const percent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    const progressPercent = ((25 * 60 - timeLeft) / (25 * 60)) * 100;
+    // SVG Circle properties
+    const radius = 60;
+    const circumference = 2 * Math.PI * radius;
+    const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
 
     return (
         <div className="py-3">
-            <div className="mb-5 text-center">
-                <h2 className="text-xl font-bold text-zinc-100 flex items-center justify-center gap-2">
-                    {template?.name || "Focus Mode"} 🎯
+            {/* Top Bar Area */}
+            <div className="flex items-center justify-between mb-5 px-1">
+                <h2 className="text-xl font-extrabold text-gray-900 tracking-tight">
+                    Focus Mode Todo
                 </h2>
-                <p className="text-sm text-zinc-400 mt-0.5">
-                    {template?.description || "Stay focused, get things done"}
-                </p>
+                <button className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 transition-colors">
+                    ✕
+                </button>
             </div>
 
-            {/* Focus Timer Card */}
-            <div className="bg-zinc-800/60 rounded-2xl p-5 border border-zinc-700/50 mb-5">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <p className="text-xs text-zinc-500 uppercase tracking-wider font-medium mb-1">Focus Session</p>
-                        <div className="flex items-baseline gap-1">
-                            <span className="text-3xl font-bold text-zinc-100 tabular-nums">{focusMinutes}</span>
-                            <span className="text-sm text-zinc-400">min</span>
+            {/* Main Task Card */}
+            <div className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm mb-5">
+                {titleBlock && (
+                    <input
+                        type="text"
+                        value={titleBlock.data?.text || ""}
+                        onChange={(e) => updateBlock(titleBlock.id, { text: e.target.value })}
+                        className="text-2xl font-bold text-gray-900 bg-transparent border-none outline-none w-full focus:ring-0 p-0 mb-6 placeholder-gray-300"
+                        placeholder="Focus objective..."
+                    />
+                )}
+
+                <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Subtasks</h3>
+                <div className="space-y-1">
+                    {items.map((item, i) => {
+                        const isChecked = typeof item === "string" ? false : item.checked;
+                        const text = typeof item === "string" ? item : item.text;
+
+                        return (
+                            <div key={i} className="group flex items-center gap-3 py-2 border-b border-gray-50 last:border-b-0">
+                                <button
+                                    type="button"
+                                    onClick={() => toggleItem(i)}
+                                    className={`
+                    w-5 h-5 rounded flex items-center justify-center transition-all flex-shrink-0 border-2
+                    ${isChecked
+                                            ? "bg-gray-800 border-gray-800 text-white"
+                                            : "bg-white border-gray-300 hover:border-gray-500"
+                                        }
+                  `}
+                                >
+                                    {isChecked && (
+                                        <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
+                                            <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    )}
+                                </button>
+                                <input
+                                    type="text"
+                                    value={text}
+                                    onChange={(e) => updateItemText(i, e.target.value)}
+                                    className={`
+                    flex-1 bg-transparent border-none outline-none text-sm p-0 focus:ring-0
+                    ${isChecked ? "line-through text-gray-400" : "text-gray-800 font-medium"}
+                  `}
+                                    placeholder="Task detail..."
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => removeItem(i)}
+                                    className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 w-6 h-6 rounded flex items-center justify-center transition-all bg-gray-50"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                        );
+                    })}
+                </div>
+                <button
+                    onClick={addItem}
+                    className="mt-3 flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 font-bold uppercase tracking-wide transition-colors"
+                >
+                    <span className="text-lg leading-none">+</span> Add task
+                </button>
+            </div>
+
+            {/* Pomodoro Timer Card */}
+            <div className="bg-white rounded-3xl p-5 border border-gray-200 shadow-sm relative overflow-hidden">
+                <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-sm font-extrabold text-gray-900">Pomodoro</h3>
+                    <button className="text-xs font-semibold text-gray-500 hover:text-gray-800 flex items-center gap-1">
+                        Distraction Blocker <span className="text-gray-400">›</span>
+                    </button>
+                </div>
+
+                <div className="flex items-center justify-center py-6 relative cursor-pointer" onClick={toggleTimer}>
+                    <div className="relative flex items-center justify-center hover:scale-105 transition-transform duration-300">
+                        {/* Background Circle */}
+                        <svg width="150" height="150" className="transform -rotate-90">
+                            <circle
+                                cx="75"
+                                cy="75"
+                                r={radius}
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                fill="transparent"
+                                className="text-orange-50"
+                            />
+                            {/* Progress Circle */}
+                            <circle
+                                cx="75"
+                                cy="75"
+                                r={radius}
+                                stroke="currentColor"
+                                strokeWidth="8"
+                                fill="transparent"
+                                strokeDasharray={circumference}
+                                strokeDashoffset={strokeDashoffset}
+                                strokeLinecap="round"
+                                className="text-orange-500 transition-all duration-1000 ease-linear"
+                            />
+                        </svg>
+                        <div className="absolute flex flex-col items-center">
+                            <span className="text-3xl font-black text-gray-900 tabular-nums tracking-tight">
+                                {formatTime(timeLeft)}
+                            </span>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">
+                                {isActive ? "Running" : "Paused"}
+                            </span>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button
-                            type="button"
-                            onClick={() => setFocusMinutes(Math.max(5, focusMinutes - 5))}
-                            className="w-8 h-8 rounded-full bg-zinc-700 text-zinc-300 hover:bg-zinc-600
-                         flex items-center justify-center text-sm transition-colors"
-                        >
-                            −
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setIsTimerActive(!isTimerActive)}
-                            className={`px-5 py-2 rounded-full text-sm font-semibold transition-all active:scale-95
-                ${isTimerActive
-                                    ? "bg-red-500 hover:bg-red-600 text-white"
-                                    : "bg-emerald-500 hover:bg-emerald-600 text-white"
-                                }`}
-                        >
-                            {isTimerActive ? "Stop" : "Start"}
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setFocusMinutes(Math.min(120, focusMinutes + 5))}
-                            className="w-8 h-8 rounded-full bg-zinc-700 text-zinc-300 hover:bg-zinc-600
-                         flex items-center justify-center text-sm transition-colors"
-                        >
-                            +
-                        </button>
                     </div>
                 </div>
 
-                {totalTasks > 0 && (
-                    <div className="mt-4 pt-3 border-t border-zinc-700/50">
-                        <div className="flex items-center justify-between mb-1.5">
-                            <span className="text-xs text-zinc-500">Progress</span>
-                            <span className="text-xs font-medium text-zinc-300">{completedTasks}/{totalTasks} done</span>
-                        </div>
-                        <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-                            <div
-                                className="h-full rounded-full bg-gradient-to-r from-emerald-400 to-blue-400 transition-all duration-500"
-                                style={{ width: `${percent}%` }}
-                            />
-                        </div>
-                    </div>
-                )}
+                <div className="flex items-center justify-between mt-4 bg-gray-50 px-4 py-3 rounded-2xl border border-gray-100">
+                    <span className="text-sm font-bold text-orange-600">Pomodoro</span>
+                    <button
+                        type="button"
+                        onClick={() => setDistractionBlocker(!distractionBlocker)}
+                        className={`w-11 h-6 rounded-full relative transition-colors duration-200 ${distractionBlocker ? 'bg-blue-500' : 'bg-gray-300'}`}
+                    >
+                        <span className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full transition-transform duration-200 ${distractionBlocker ? 'translate-x-5' : 'translate-x-0'}`} />
+                    </button>
+                </div>
             </div>
 
-            {/* Priority Sections */}
-            <div className="space-y-4">
-                {priorities.map((pr, pi) => {
-                    const style = PRIORITY_LEVELS[pi];
-                    return (
-                        <div
-                            key={pi}
-                            className={`rounded-2xl border ${style.border} overflow-hidden bg-zinc-800/40`}
-                        >
-                            <div className={`${style.bg} px-4 py-3 flex items-center justify-between`}>
-                                <div className="flex items-center gap-2">
-                                    <span className="text-lg">{style.emoji}</span>
-                                    <h4 className={`text-sm font-semibold ${style.labelColor}`}>
-                                        {style.label}
-                                    </h4>
-                                </div>
-                                {pr.items.length > 0 && (
-                                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${style.tagBg}`}>
-                                        {pr.items.filter(i => i.checked).length}/{pr.items.length}
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="px-4 py-2">
-                                {pr.items.map((item, ii) => (
-                                    <div
-                                        key={ii}
-                                        className="group flex items-center gap-3 py-2.5 border-b border-zinc-700/30 last:border-b-0"
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => toggleItem(pi, ii)}
-                                            className={`
-                        flex-shrink-0 w-5 h-5 rounded-full border-2
-                        flex items-center justify-center transition-all
-                        ${item.checked
-                                                    ? `${style.checkColor} text-white`
-                                                    : "border-zinc-500 bg-zinc-700/50 hover:border-zinc-400"
-                                                }
-                      `}
-                                        >
-                                            {item.checked && (
-                                                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
-                                                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
-                                            )}
-                                        </button>
-                                        <input
-                                            type="text"
-                                            value={item.text}
-                                            onChange={(e) => updateItemText(pi, ii, e.target.value)}
-                                            className={`
-                        flex-1 bg-transparent border-none outline-none text-sm
-                        ${item.checked ? "line-through text-zinc-500" : "text-zinc-200"}
-                      `}
-                                            placeholder="Add task…"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeItem(pi, ii)}
-                                            className="opacity-0 group-hover:opacity-100 text-zinc-500
-                                 hover:text-red-400 text-xs transition-all"
-                                        >
-                                            ✕
-                                        </button>
-                                    </div>
-                                ))}
-
-                                <button
-                                    type="button"
-                                    onClick={() => addItem(pi)}
-                                    className={`flex items-center gap-1 text-xs font-medium py-2 transition-colors ${style.labelColor} opacity-70 hover:opacity-100`}
-                                >
-                                    <span className="text-sm">+</span> Add task
-                                </button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
+            <button className="w-full mt-6 bg-gray-900 hover:bg-gray-800 text-white font-bold py-4 rounded-2xl shadow-sm transition-all active:scale-[0.98]">
+                Done for today
+            </button>
         </div>
     );
 }

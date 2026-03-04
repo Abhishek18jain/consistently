@@ -1,26 +1,31 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { nanoid } from "nanoid";
 
 /**
- * Workspace Dashboard Layout — fully dark theme
+ * Workspace Dashboard Layout — Exactly matching screenshot
+ * 2x2 grid: Checklist | Calendar
+ *           Notes     | Tasks
+ * Bottom toolbar with widget type buttons
  */
 
+const DAYS = ["S", "M", "T", "W", "T", "F", "S"];
+
 const WIDGET_TYPES = {
-    checklist: { label: "Checklist", emoji: "☑️", color: "bg-emerald-500" },
-    notes: { label: "Notes", emoji: "📝", color: "bg-amber-500" },
-    calendar: { label: "Calendar", emoji: "📅", color: "bg-blue-500" },
-    tasks: { label: "Tasks", emoji: "✅", color: "bg-purple-500" },
+    checklist: { label: "Checklist", emoji: "☑️", bgDot: "bg-emerald-500", border: "border-emerald-200", headerBg: "bg-emerald-50", headerText: "text-emerald-600" },
+    calendar: { label: "Calendar", emoji: "📅", bgDot: "bg-blue-500", border: "border-blue-200", headerBg: "bg-blue-50", headerText: "text-blue-600" },
+    notes: { label: "Notes", emoji: "📝", bgDot: "bg-amber-500", border: "border-amber-200", headerBg: "bg-amber-50", headerText: "text-amber-600" },
+    tasks: { label: "Tasks", emoji: "✅", bgDot: "bg-purple-500", border: "border-purple-200", headerBg: "bg-purple-50", headerText: "text-purple-600" },
 };
 
-const DAYS_IN_WEEK = ["S", "M", "T", "W", "T", "F", "S"];
-
 function MiniCalendar() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const today = now.getDate();
+    const [offset, setOffset] = useState(0);
+    const base = new Date();
+    base.setMonth(base.getMonth() + offset);
+    const year = base.getFullYear();
+    const month = base.getMonth();
+    const today = new Date();
 
-    const monthName = now.toLocaleDateString("en-US", { month: "long", year: "numeric" });
+    const monthName = base.toLocaleDateString("en-US", { month: "long", year: "numeric" });
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
@@ -28,26 +33,24 @@ function MiniCalendar() {
     for (let i = 0; i < firstDay; i++) cells.push(null);
     for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
+    const isToday = (d) => d === today.getDate() && month === today.getMonth() && year === today.getFullYear();
+
     return (
         <div>
             <div className="flex items-center justify-between mb-2">
-                <button className="text-zinc-500 hover:text-zinc-300 text-xs">‹</button>
-                <span className="text-xs font-semibold text-zinc-300">{monthName}</span>
-                <button className="text-zinc-500 hover:text-zinc-300 text-xs">›</button>
+                <button onClick={() => setOffset(o => o - 1)} className="text-gray-400 hover:text-gray-700 px-2 py-1 text-sm">‹</button>
+                <span className="text-[10px] font-bold text-gray-700 uppercase tracking-wider">{monthName}</span>
+                <button onClick={() => setOffset(o => o + 1)} className="text-gray-400 hover:text-gray-700 px-2 py-1 text-sm">›</button>
             </div>
             <div className="grid grid-cols-7 gap-0.5 text-center">
-                {DAYS_IN_WEEK.map((d, i) => (
-                    <span key={i} className="text-[9px] text-zinc-500 font-medium py-0.5">{d}</span>
+                {DAYS.map((d, i) => (
+                    <span key={i} className="text-[9px] font-bold text-gray-400 py-1">{d}</span>
                 ))}
                 {cells.map((day, i) => (
-                    <button
-                        key={i}
-                        className={`text-[10px] py-0.5 rounded-full transition-colors
-              ${day === today
-                                ? "bg-blue-500 text-white font-bold"
-                                : day ? "text-zinc-400 hover:bg-zinc-700/50" : ""
-                            }`}
-                    >
+                    <button key={i} className={`text-[11px] py-1 rounded transition-colors ${isToday(day)
+                            ? "bg-blue-600 text-white font-bold shadow-sm"
+                            : day ? "text-gray-700 hover:bg-gray-100 font-medium" : ""
+                        }`}>
                         {day || ""}
                     </button>
                 ))}
@@ -57,122 +60,74 @@ function MiniCalendar() {
 }
 
 function ChecklistWidget({ items, onChange }) {
-    const toggleItem = (idx) => {
-        const updated = [...items];
-        updated[idx] = { ...updated[idx], checked: !updated[idx].checked };
-        onChange(updated);
+    const toggle = (i) => {
+        const u = [...items];
+        u[i] = { ...u[i], checked: !u[i].checked };
+        onChange(u);
     };
-
-    const updateText = (idx, text) => {
-        const updated = [...items];
-        updated[idx] = { ...updated[idx], text };
-        onChange(updated);
+    const updateText = (i, text) => {
+        const u = [...items];
+        u[i] = { ...u[i], text };
+        onChange(u);
     };
-
-    const addItem = () => {
-        onChange([...items, { text: "", checked: false }]);
-    };
-
     return (
         <div className="space-y-2">
             {items.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => toggleItem(i)}
-                        className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-all
-              ${item.checked ? "bg-blue-500 border-blue-500 text-white" : "border-zinc-500 bg-zinc-700/50"}`}
-                    >
+                <div key={i} className="flex items-center gap-2 group">
+                    <button type="button" onClick={() => toggle(i)}
+                        className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${item.checked ? "bg-emerald-500 border-emerald-500 text-white" : "border-gray-300 bg-white hover:border-emerald-400"
+                            }`}>
                         {item.checked && (
                             <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         )}
                     </button>
-                    <input
-                        type="text"
-                        value={item.text}
-                        onChange={(e) => updateText(i, e.target.value)}
-                        className={`flex-1 text-xs bg-transparent border-none outline-none
-              ${item.checked ? "line-through text-zinc-500" : "text-zinc-200"}`}
-                        placeholder="Add item..."
-                    />
+                    <input type="text" value={item.text} onChange={(e) => updateText(i, e.target.value)}
+                        className={`flex-1 text-xs bg-transparent outline-none border-none focus:ring-0 p-0 ${item.checked ? "line-through text-gray-400" : "text-gray-700 font-medium"}`}
+                        placeholder="Add item..." />
                 </div>
             ))}
-            <button
-                type="button"
-                onClick={addItem}
-                className="text-xs text-zinc-500 hover:text-blue-400 font-medium flex items-center gap-1"
-            >
-                <span>+</span> Add item...
+            <button type="button" onClick={() => onChange([...items, { text: "", checked: false }])}
+                className="text-[10px] font-bold text-gray-400 hover:text-emerald-600 flex items-center gap-1 mt-2 uppercase tracking-wide transition-colors">
+                <span className="text-sm">+</span> Add item...
             </button>
         </div>
     );
 }
 
-function NotesWidget({ text, onChange }) {
-    return (
-        <div className="flex items-start gap-2">
-            <span className="text-zinc-500 text-xs mt-0.5">📄</span>
-            <textarea
-                value={text}
-                onChange={(e) => onChange(e.target.value)}
-                className="flex-1 text-xs text-zinc-300 bg-transparent border-none outline-none resize-none min-h-[40px]"
-                placeholder="Write a note..."
-            />
-        </div>
-    );
-}
-
 function TasksWidget({ items, onChange }) {
-    const toggleItem = (idx) => {
-        const updated = [...items];
-        updated[idx] = { ...updated[idx], checked: !updated[idx].checked };
-        onChange(updated);
+    const toggle = (i) => {
+        const u = [...items];
+        u[i] = { ...u[i], checked: !u[i].checked };
+        onChange(u);
     };
-
-    const updateText = (idx, text) => {
-        const updated = [...items];
-        updated[idx] = { ...updated[idx], text };
-        onChange(updated);
+    const updateText = (i, text) => {
+        const u = [...items];
+        u[i] = { ...u[i], text };
+        onChange(u);
     };
-
-    const addItem = () => {
-        onChange([...items, { text: "", checked: false }]);
-    };
-
     return (
         <div className="space-y-2">
             {items.map((item, i) => (
-                <div key={i} className="flex items-center gap-2">
-                    <button
-                        type="button"
-                        onClick={() => toggleItem(i)}
-                        className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center transition-all
-              ${item.checked ? "bg-purple-500 border-purple-500 text-white" : "border-zinc-500 bg-zinc-700/50"}`}
-                    >
+                <div key={i} className="flex items-center gap-2 group">
+                    <button type="button" onClick={() => toggle(i)}
+                        className={`flex-shrink-0 w-4 h-4 rounded border-2 flex items-center justify-center transition-all ${item.checked ? "bg-purple-500 border-purple-500 text-white" : "border-gray-300 bg-white hover:border-purple-400"
+                            }`}>
                         {item.checked && (
                             <svg className="w-2.5 h-2.5" viewBox="0 0 12 12" fill="none">
-                                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+                                <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                         )}
                     </button>
-                    <input
-                        type="text"
-                        value={item.text}
-                        onChange={(e) => updateText(i, e.target.value)}
-                        className={`flex-1 text-xs bg-transparent border-none outline-none
-              ${item.checked ? "line-through text-zinc-500" : "text-zinc-200"}`}
-                        placeholder="Add task..."
-                    />
+                    <input type="text" value={item.text} onChange={(e) => updateText(i, e.target.value)}
+                        className={`flex-1 text-xs bg-transparent outline-none border-none focus:ring-0 p-0 ${item.checked ? "line-through text-gray-400" : "text-gray-700 font-medium"}`}
+                        placeholder="Add task..." />
                 </div>
             ))}
-            <button
-                type="button"
-                onClick={addItem}
-                className="text-xs text-zinc-500 hover:text-purple-400 font-medium flex items-center gap-1"
-            >
-                <span>+</span> Add a task...
+            <button type="button" onClick={() => onChange([...items, { text: "", checked: false }])}
+                className="text-[10px] font-bold text-gray-400 hover:text-purple-600 flex items-center gap-1 mt-2 uppercase tracking-wide transition-colors">
+                <span className="text-sm">+</span> Add a task...
             </button>
         </div>
     );
@@ -180,136 +135,121 @@ function TasksWidget({ items, onChange }) {
 
 export default function WorkspaceLayout({ template, blocks, setBlocks }) {
     const [widgets, setWidgets] = useState(() => {
-        const defaultWidgets = [
-            { id: "checklist", type: "checklist", data: { items: [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }] } },
-            { id: "calendar", type: "calendar", data: {} },
-            { id: "notes", type: "notes", data: { text: "" } },
-            { id: "tasks", type: "tasks", data: { items: [{ text: "", checked: false }, { text: "", checked: false }] } },
-        ];
+        const checklistBlock = blocks.find(b => b.type === "checklist");
+        const textBlock = blocks.find(b => b.type === "text");
 
-        if (blocks.length > 0) {
-            const checklistBlock = blocks.find(b => b.type === "checklist");
-            const textBlock = blocks.find(b => b.type === "text");
-            if (checklistBlock) {
-                defaultWidgets[0].data.items = (checklistBlock.data?.items || []).map(item =>
-                    typeof item === "string" ? { text: item, checked: false } : { text: item.text || "", checked: !!item.checked }
-                );
-            }
-            if (textBlock) {
-                defaultWidgets[2].data.text = textBlock.data?.text || "";
-            }
-        }
-        return defaultWidgets;
+        return [
+            {
+                id: "checklist",
+                type: "checklist",
+                data: {
+                    items: (checklistBlock?.data?.items || [{ text: "", checked: false }, { text: "", checked: false }, { text: "", checked: false }])
+                        .map(item => typeof item === "string" ? { text: item, checked: false } : { text: item.text || "", checked: !!item.checked }),
+                },
+            },
+            { id: "calendar", type: "calendar", data: {} },
+            {
+                id: "notes",
+                type: "notes",
+                data: { text: textBlock?.data?.text || "" },
+            },
+            {
+                id: "tasks",
+                type: "tasks",
+                data: { items: [{ text: "", checked: false }, { text: "", checked: false }] },
+            },
+        ];
     });
 
     const updateWidget = (id, newData) => {
         setWidgets(prev => prev.map(w => w.id === id ? { ...w, data: newData } : w));
-
         const widget = widgets.find(w => w.id === id);
-        if (widget?.type === "checklist" || widget?.type === "tasks") {
-            const checklistBlock = blocks.find(b => b.type === "checklist");
-            if (checklistBlock) {
-                setBlocks(prev => prev.map(b =>
-                    b.id === checklistBlock.id ? { ...b, data: { items: newData.items } } : b
-                ));
-            }
+        if (widget?.type === "checklist") {
+            const b = blocks.find(b => b.type === "checklist");
+            if (b) setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, data: { items: newData.items } } : bl));
         } else if (widget?.type === "notes") {
-            const textBlock = blocks.find(b => b.type === "text");
-            if (textBlock) {
-                setBlocks(prev => prev.map(b =>
-                    b.id === textBlock.id ? { ...b, data: { text: newData.text } } : b
-                ));
-            }
+            const b = blocks.find(b => b.type === "text");
+            if (b) setBlocks(prev => prev.map(bl => bl.id === b.id ? { ...bl, data: { text: newData.text } } : bl));
         }
     };
 
     const addWidget = (type) => {
-        const newWidget = {
+        setWidgets(prev => [...prev, {
             id: nanoid(),
             type,
             data: type === "notes" ? { text: "" } : { items: [{ text: "", checked: false }] },
-        };
-        setWidgets(prev => [...prev, newWidget]);
+        }]);
     };
 
     return (
-        <div className="py-3">
-            <div className="mb-6 text-center">
-                <h2 className="text-xl font-bold text-zinc-100">
-                    {template?.name || "Custom Workspace"}
-                </h2>
-                <p className="text-sm text-zinc-400 mt-0.5">
-                    {template?.description || "Your personalized workspace"}
-                </p>
+        <div className="py-3 pb-24 relative" style={{ background: "#f0eeff", minHeight: "100%" }}>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-5 px-1">
+                <button className="text-gray-400 text-lg">‹</button>
+                <h2 className="text-lg font-extrabold text-gray-900">Custom Workspace</h2>
+                <button className="text-blue-500 text-xl font-medium">+</button>
             </div>
 
+            {/* 2x2 Widget Grid */}
             <div className="grid grid-cols-2 gap-3">
                 {widgets.map((widget) => {
                     const meta = WIDGET_TYPES[widget.type] || WIDGET_TYPES.checklist;
                     return (
                         <div
                             key={widget.id}
-                            className="bg-zinc-800/60 rounded-2xl p-4 border border-zinc-700/50
-                         hover:border-zinc-600/50 transition-colors"
+                            className="bg-white rounded-2xl p-3.5 border border-gray-100 shadow-sm hover:shadow-md transition-all duration-200"
                         >
+                            {/* Widget Header */}
                             <div className="flex items-center justify-between mb-3">
-                                <h4 className="text-sm font-semibold text-zinc-200">{meta.label}</h4>
-                                <button className="text-zinc-500 hover:text-zinc-300 text-xs">⋯</button>
+                                <span className="text-xs font-extrabold text-gray-800">{meta.label}</span>
+                                <button className="text-gray-300 hover:text-gray-600 text-sm font-bold">⋯</button>
                             </div>
 
                             {widget.type === "checklist" && (
-                                <ChecklistWidget
-                                    items={widget.data.items || []}
-                                    onChange={(items) => updateWidget(widget.id, { items })}
-                                />
+                                <ChecklistWidget items={widget.data.items || []} onChange={(items) => updateWidget(widget.id, { items })} />
                             )}
                             {widget.type === "calendar" && <MiniCalendar />}
                             {widget.type === "notes" && (
-                                <NotesWidget
-                                    text={widget.data.text || ""}
-                                    onChange={(text) => updateWidget(widget.id, { text })}
-                                />
+                                <div className="flex items-start gap-2">
+                                    <span className="text-blue-400 text-sm mt-0.5">📄</span>
+                                    <textarea
+                                        value={widget.data.text || ""}
+                                        onChange={(e) => updateWidget(widget.id, { text: e.target.value })}
+                                        className="flex-1 text-xs text-gray-700 font-medium bg-transparent border-none outline-none resize-none min-h-[80px] focus:ring-0 p-0 placeholder-gray-400"
+                                        placeholder="Write a note..."
+                                    />
+                                </div>
                             )}
                             {widget.type === "tasks" && (
-                                <TasksWidget
-                                    items={widget.data.items || []}
-                                    onChange={(items) => updateWidget(widget.id, { items })}
-                                />
+                                <TasksWidget items={widget.data.items || []} onChange={(items) => updateWidget(widget.id, { items })} />
                             )}
                         </div>
                     );
                 })}
             </div>
 
-            <div className="mt-6 flex items-center justify-center gap-2 flex-wrap">
+            {/* Widget Toolbar — bottom bar */}
+            <div className="fixed bottom-20 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white border border-gray-200 shadow-lg rounded-full px-4 py-2 z-30">
                 {Object.entries(WIDGET_TYPES).map(([key, meta]) => (
                     <button
                         key={key}
                         type="button"
                         onClick={() => addWidget(key)}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full
-                       bg-zinc-800/60 border border-zinc-700/50
-                       text-xs font-medium text-zinc-300 hover:bg-zinc-700/60
-                       hover:text-zinc-100 transition-colors"
+                        className="flex items-center gap-1.5 text-[11px] font-bold text-gray-600 hover:text-gray-900 px-2 py-1 rounded-full hover:bg-gray-100 transition-colors"
                     >
-                        <span className={`w-3 h-3 rounded-sm ${meta.color}`} />
-                        {meta.label}
+                        <span>{meta.emoji}</span>
+                        <span>{meta.label}</span>
                     </button>
                 ))}
             </div>
 
-            <div className="flex justify-center mt-5">
+            {/* Floating Add Button */}
+            <div className="flex justify-center mt-6">
                 <button
-                    type="button"
                     onClick={() => addWidget("checklist")}
-                    className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white
-                     shadow-lg shadow-blue-500/30 flex items-center justify-center
-                     transition-all active:scale-90"
+                    className="w-12 h-12 rounded-full bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-200 flex items-center justify-center text-2xl active:scale-90 transition-transform"
                 >
-                    <svg className="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                        <line x1="12" y1="5" x2="12" y2="19" />
-                        <line x1="5" y1="12" x2="19" y2="12" />
-                    </svg>
+                    +
                 </button>
             </div>
         </div>

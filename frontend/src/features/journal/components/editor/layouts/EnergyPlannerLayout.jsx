@@ -1,217 +1,323 @@
-import { useMemo } from "react";
+import { useState, useRef } from "react";
 
 /**
- * Energy Planner Layout — fully dark theme
+ * Energy Planner Layout - Light modern design matching screenshot
+ * Energy slider → 3 zones: High / Medium / Low
+ * Each task has: text, duration, tags, colored dot
  */
 
-const ENERGY_LEVELS = [
+const ENERGY_ZONES = [
     {
+        key: "high",
         label: "High Energy",
-        emoji: "🔥",
-        description: "Deep work, complex tasks",
-        bg: "bg-orange-500/10",
-        border: "border-orange-500/30",
-        labelColor: "text-orange-400",
-        iconBg: "bg-orange-500/20",
-        addColor: "text-orange-400 hover:text-orange-300",
+        range: [67, 100],
+        bg: "bg-orange-50",
+        border: "border-orange-100",
+        headerText: "text-orange-700",
+        dotColor: "bg-orange-500",
+        sliderColor: "#f97316",
     },
     {
+        key: "medium",
         label: "Medium Energy",
-        emoji: "⚡",
-        description: "Meetings, collaboration",
-        bg: "bg-blue-500/10",
-        border: "border-blue-500/30",
-        labelColor: "text-blue-400",
-        iconBg: "bg-blue-500/20",
-        addColor: "text-blue-400 hover:text-blue-300",
+        range: [34, 66],
+        bg: "bg-amber-50",
+        border: "border-amber-100",
+        headerText: "text-amber-700",
+        dotColor: "bg-yellow-400",
+        sliderColor: "#eab308",
     },
     {
+        key: "low",
         label: "Low Energy",
-        emoji: "🌙",
-        description: "Admin, routine tasks",
-        bg: "bg-emerald-500/10",
-        border: "border-emerald-500/30",
-        labelColor: "text-emerald-400",
-        iconBg: "bg-emerald-500/20",
-        addColor: "text-emerald-400 hover:text-emerald-300",
+        range: [0, 33],
+        bg: "bg-blue-50",
+        border: "border-blue-100",
+        headerText: "text-blue-700",
+        dotColor: "bg-blue-400",
+        sliderColor: "#60a5fa",
     },
 ];
 
+const TAG_COLORS = [
+    "bg-purple-50 text-purple-600",
+    "bg-blue-50 text-blue-600",
+    "bg-emerald-50 text-emerald-600",
+    "bg-rose-50 text-rose-600",
+    "bg-amber-50 text-amber-600",
+];
+
 function parseZones(blocks) {
-    const zones = [];
-    let current = null;
+    const zones = { high: [], medium: [], low: [] };
+    let currentZone = "high";
+    let zoneIdx = 0;
+    const zoneKeys = ["high", "medium", "low"];
 
     for (const block of blocks) {
         if (block.type === "text") {
-            if (current) zones.push(current);
-            current = { title: block.data?.text || "", items: [], titleBlockId: block.id };
-        } else if (block.type === "checklist" && current) {
-            current.items = (block.data?.items || []).map((item) =>
+            const txt = (block.data?.text || "").toLowerCase();
+            if (txt.includes("high")) currentZone = "high";
+            else if (txt.includes("medium") || txt.includes("mid")) currentZone = "medium";
+            else if (txt.includes("low")) currentZone = "low";
+            else {
+                // Advance zone based on order
+                if (zoneIdx < zoneKeys.length) {
+                    currentZone = zoneKeys[zoneIdx++];
+                }
+            }
+        } else if (block.type === "checklist") {
+            const items = (block.data?.items || []).map((item) =>
                 typeof item === "string"
-                    ? { text: item, checked: false }
-                    : { text: item.text || "", checked: !!item.checked }
-            );
-            current.checklistBlockId = block.id;
+                    ? { text: item, checked: false, duration: "", tag: "", tagColor: 0 }
+                    : {
+                        text: item.text || "",
+                        checked: !!item.checked,
+                        duration: item.duration || "",
+                        tag: item.tag || "",
+                        tagColor: item.tagColor ?? 0,
+                        blockId: block.id,
+                    }
+            ).map(item => ({ ...item, blockId: block.id }));
+
+            zones[currentZone] = [...zones[currentZone], ...items];
         }
     }
-    if (current) zones.push(current);
 
-    while (zones.length < 3) {
-        zones.push({
-            title: ENERGY_LEVELS[zones.length]?.label || "",
-            items: [],
-        });
-    }
-
-    return zones.slice(0, 3);
+    return zones;
 }
 
 export default function EnergyPlannerLayout({ template, blocks, setBlocks }) {
+    const [energyLevel, setEnergyLevel] = useState(80);
+    const [addingTo, setAddingTo] = useState(null); // zone key
+    const [newTaskText, setNewTaskText] = useState("");
+
     const zones = parseZones(blocks);
 
-    const updateZoneItems = (zoneIdx, newItems) => {
-        const zone = zones[zoneIdx];
-        if (!zone?.checklistBlockId) return;
+    // Which zone is highlighted based on slider
+    const activeZone = ENERGY_ZONES.find((z) =>
+        energyLevel >= z.range[0] && energyLevel <= z.range[1]
+    );
+
+    const updateItemInBlock = (blockId, items) => {
         setBlocks((prev) =>
             prev.map((b) =>
-                b.id === zone.checklistBlockId
-                    ? { ...b, data: { items: newItems } }
-                    : b
+                b.id === blockId ? { ...b, data: { items } } : b
             )
         );
     };
 
-    const toggleItem = (zoneIdx, itemIdx) => {
-        const items = [...zones[zoneIdx].items];
-        items[itemIdx] = { ...items[itemIdx], checked: !items[itemIdx].checked };
-        updateZoneItems(zoneIdx, items);
+    const toggleItem = (zoneKey, itemIdx) => {
+        const item = zones[zoneKey][itemIdx];
+        if (!item?.blockId) return;
+
+        const block = blocks.find(b => b.id === item.blockId);
+        if (!block) return;
+
+        const blockItems = (block.data?.items || []).map((bi, i) => {
+            const normalItem = typeof bi === "string"
+                ? { text: bi, checked: false }
+                : { ...bi };
+            if (b => b.id === item.blockId) return normalItem;
+            return bi;
+        });
+
+        // Find which item within this block corresponds to our item
+        const blockItemIdx = (block.data?.items || []).findIndex((bi, localIdx) => {
+            const normalBi = typeof bi === "string" ? { text: bi, checked: false } : bi;
+            return normalBi.text === item.text;
+        });
+
+        if (blockItemIdx < 0) return;
+
+        const newItems = [...(block.data?.items || [])];
+        if (typeof newItems[blockItemIdx] === "string") {
+            newItems[blockItemIdx] = { text: newItems[blockItemIdx], checked: true };
+        } else {
+            newItems[blockItemIdx] = { ...newItems[blockItemIdx], checked: !newItems[blockItemIdx].checked };
+        }
+        updateItemInBlock(item.blockId, newItems);
     };
 
-    const updateItemText = (zoneIdx, itemIdx, text) => {
-        const items = [...zones[zoneIdx].items];
-        items[itemIdx] = { ...items[itemIdx], text };
-        updateZoneItems(zoneIdx, items);
+    const updateItemField = (zoneKey, itemIdx, field, value) => {
+        const item = zones[zoneKey][itemIdx];
+        if (!item?.blockId) return;
+
+        const block = blocks.find(b => b.id === item.blockId);
+        if (!block) return;
+
+        const blockItemIdx = (block.data?.items || []).findIndex((bi) => {
+            const normalBi = typeof bi === "string" ? { text: bi } : bi;
+            return normalBi.text === item.text;
+        });
+
+        if (blockItemIdx < 0) return;
+
+        const newItems = [...(block.data?.items || [])];
+        if (typeof newItems[blockItemIdx] === "string") {
+            newItems[blockItemIdx] = { text: newItems[blockItemIdx], checked: false, [field]: value };
+        } else {
+            newItems[blockItemIdx] = { ...newItems[blockItemIdx], [field]: value };
+        }
+        updateItemInBlock(item.blockId, newItems);
     };
 
-    const addItem = (zoneIdx) => {
-        const items = [...zones[zoneIdx].items, { text: "", checked: false }];
-        updateZoneItems(zoneIdx, items);
+    const addItemToBlock = (zoneKey) => {
+        if (!newTaskText.trim()) return;
+
+        const checklistBlock = blocks.find(b => b.type === "checklist" && (() => {
+            return true; // fallback - use first checklist for zone
+        })());
+
+        // Find the right block for this zone
+        let targetBlock = null;
+        let currentZ = "high";
+        let zIdx = 0;
+        const zKeys = ["high", "medium", "low"];
+
+        for (const block of blocks) {
+            if (block.type === "text") {
+                const txt = (block.data?.text || "").toLowerCase();
+                if (txt.includes("high")) currentZ = "high";
+                else if (txt.includes("medium") || txt.includes("mid")) currentZ = "medium";
+                else if (txt.includes("low")) currentZ = "low";
+                else {
+                    if (zIdx < zKeys.length) currentZ = zKeys[zIdx++];
+                }
+            } else if (block.type === "checklist" && currentZ === zoneKey) {
+                targetBlock = block;
+                break;
+            }
+        }
+
+        if (!targetBlock) {
+            // Fall back to first checklist block
+            targetBlock = blocks.find(b => b.type === "checklist");
+        }
+
+        if (!targetBlock) return;
+
+        const newItem = { text: newTaskText.trim(), checked: false, duration: "", tag: "", tagColor: 0 };
+        updateItemInBlock(targetBlock.id, [...(targetBlock.data?.items || []), newItem]);
+        setNewTaskText("");
+        setAddingTo(null);
     };
 
-    const removeItem = (zoneIdx, itemIdx) => {
-        const items = zones[zoneIdx].items.filter((_, i) => i !== itemIdx);
-        updateZoneItems(zoneIdx, items);
-    };
-
-    const totalTasks = zones.reduce((sum, z) => sum + z.items.length, 0);
-    const completedTasks = zones.reduce((sum, z) => sum + z.items.filter(i => i.checked).length, 0);
+    // Slider gradient stops
+    const sliderGradient = "linear-gradient(to right, #60a5fa 0%, #60a5fa 33%, #eab308 33%, #eab308 67%, #f97316 67%, #f97316 100%)";
 
     return (
         <div className="py-3">
-            <div className="mb-5 text-center">
-                <h2 className="text-xl font-bold text-zinc-100 flex items-center justify-center gap-2">
-                    {template?.name || "Energy Planner"} ⚡
+            {/* Header */}
+            <div className="flex items-center justify-between mb-6 px-1">
+                <h2 className="text-xl font-extrabold text-gray-900">
+                    {template?.name || "Energy-Based Planner"}
                 </h2>
-                <p className="text-sm text-zinc-400 mt-0.5">
-                    {template?.description || "Plan tasks based on your energy level"}
-                </p>
             </div>
 
-            {totalTasks > 0 && (
-                <div className="bg-zinc-800/60 rounded-2xl p-4 border border-zinc-700/50 mb-5">
-                    <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium text-zinc-300">Today's Progress</span>
-                        <span className="text-sm font-bold text-zinc-100">{completedTasks}/{totalTasks}</span>
-                    </div>
-                    <div className="h-2 bg-zinc-700 rounded-full overflow-hidden">
-                        <div
-                            className="h-full rounded-full bg-gradient-to-r from-orange-400 via-blue-400 to-emerald-400 transition-all duration-500"
-                            style={{ width: `${totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0}%` }}
-                        />
-                    </div>
+            {/* Energy Slider Card */}
+            <div className="bg-white rounded-3xl p-5 border border-gray-100 shadow-sm mb-6">
+                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">Energy Level</p>
+                <div className="relative">
+                    {/* Gradient bar */}
+                    <div className="h-2 rounded-full" style={{ background: sliderGradient }} />
+                    <input
+                        type="range"
+                        min={0}
+                        max={100}
+                        value={energyLevel}
+                        onChange={(e) => setEnergyLevel(Number(e.target.value))}
+                        className="absolute inset-0 w-full opacity-0 cursor-pointer h-2"
+                    />
+                    {/* Thumb indicator */}
+                    <div
+                        className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full bg-white border-2 border-orange-400 shadow-md pointer-events-none transition-all"
+                        style={{ left: `calc(${energyLevel}% - 10px)` }}
+                    />
                 </div>
-            )}
+                <div className="flex justify-between mt-2">
+                    <span className="text-[10px] font-bold text-gray-400">Low</span>
+                    <span className="text-[10px] font-bold text-gray-400">Medium</span>
+                    <span className="text-[10px] font-bold text-gray-400">High</span>
+                </div>
+            </div>
 
+            {/* Zone Sections */}
             <div className="space-y-4">
-                {zones.map((zone, zi) => {
-                    const style = ENERGY_LEVELS[zi];
-                    const completedInZone = zone.items.filter(i => i.checked).length;
+                {ENERGY_ZONES.map((zone) => {
+                    const items = zones[zone.key] || [];
+                    const isActive = activeZone?.key === zone.key;
+
                     return (
                         <div
-                            key={zi}
-                            className={`rounded-2xl border ${style.border} overflow-hidden bg-zinc-800/40`}
+                            key={zone.key}
+                            className={`rounded-3xl p-5 border ${zone.border} ${zone.bg} transition-all duration-300 ${isActive ? "shadow-md ring-2 ring-offset-1 ring-current ring-opacity-20" : "shadow-sm"}`}
                         >
-                            <div className={`${style.bg} px-4 py-3 flex items-center justify-between`}>
-                                <div className="flex items-center gap-2">
-                                    <span className={`w-8 h-8 rounded-xl ${style.iconBg} flex items-center justify-center text-lg`}>
-                                        {style.emoji}
-                                    </span>
-                                    <div>
-                                        <h4 className={`text-sm font-semibold ${style.labelColor}`}>
-                                            {style.label}
-                                        </h4>
-                                        <p className="text-[10px] text-zinc-500">{style.description}</p>
-                                    </div>
-                                </div>
-                                {zone.items.length > 0 && (
-                                    <span className={`text-xs font-medium ${style.labelColor} opacity-70`}>
-                                        {completedInZone}/{zone.items.length}
-                                    </span>
-                                )}
-                            </div>
+                            <h3 className={`text-sm font-extrabold ${zone.headerText} mb-4 flex items-center gap-2`}>
+                                <span className={`w-2.5 h-2.5 rounded-full ${zone.dotColor}`} />
+                                {zone.label}
+                            </h3>
 
-                            <div className="px-4 py-2">
-                                {zone.items.map((item, ii) => (
-                                    <div
-                                        key={ii}
-                                        className="group flex items-center gap-3 py-2.5 border-b border-zinc-700/30 last:border-b-0"
-                                    >
-                                        <button
-                                            type="button"
-                                            onClick={() => toggleItem(zi, ii)}
-                                            className={`
-                        flex-shrink-0 w-5 h-5 rounded-full border-2
-                        flex items-center justify-center transition-all
-                        ${item.checked
-                                                    ? "bg-emerald-500 border-emerald-500 text-white scale-110"
-                                                    : "border-zinc-500 bg-zinc-700/50 hover:border-zinc-400"
-                                                }
-                      `}
-                                        >
-                                            {item.checked && (
-                                                <svg className="w-3 h-3" viewBox="0 0 12 12" fill="none">
-                                                    <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                                </svg>
+                            <div className="space-y-3">
+                                {items.map((item, i) => (
+                                    <div key={i} className="bg-white rounded-2xl p-3.5 shadow-sm border border-white/80">
+                                        <div className="flex items-center gap-2 mb-2">
+                                            <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${zone.dotColor}`} />
+                                            <input
+                                                type="text"
+                                                value={item.text}
+                                                onChange={(e) => updateItemField(zone.key, i, "text", e.target.value)}
+                                                className="flex-1 text-sm font-bold text-gray-800 bg-transparent border-none outline-none p-0 focus:ring-0"
+                                            />
+                                            <input
+                                                type="text"
+                                                value={item.duration}
+                                                onChange={(e) => updateItemField(zone.key, i, "duration", e.target.value)}
+                                                className="w-10 text-xs font-bold text-gray-400 bg-transparent border-none outline-none p-0 focus:ring-0 text-right"
+                                                placeholder="1h"
+                                            />
+                                        </div>
+                                        <div className="flex items-center gap-1.5 pl-5">
+                                            {item.tag && (
+                                                <span className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${TAG_COLORS[item.tagColor % TAG_COLORS.length]}`}>
+                                                    {item.tag}
+                                                </span>
                                             )}
-                                        </button>
-                                        <input
-                                            type="text"
-                                            value={item.text}
-                                            onChange={(e) => updateItemText(zi, ii, e.target.value)}
-                                            className={`
-                        flex-1 bg-transparent border-none outline-none text-sm
-                        ${item.checked ? "line-through text-zinc-500" : "text-zinc-200"}
-                      `}
-                                            placeholder="Add task…"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => removeItem(zi, ii)}
-                                            className="opacity-0 group-hover:opacity-100 text-zinc-500
-                                 hover:text-red-400 text-xs transition-all"
-                                        >
-                                            ✕
-                                        </button>
+                                            <input
+                                                type="text"
+                                                value={item.tag}
+                                                onChange={(e) => updateItemField(zone.key, i, "tag", e.target.value)}
+                                                className="text-[10px] font-semibold text-gray-400 bg-transparent border-none outline-none p-0 focus:ring-0 w-16"
+                                                placeholder="+ tag"
+                                            />
+                                        </div>
                                     </div>
                                 ))}
 
-                                <button
-                                    type="button"
-                                    onClick={() => addItem(zi)}
-                                    className={`flex items-center gap-1 text-xs font-medium py-2 transition-colors ${style.addColor}`}
-                                >
-                                    <span className="text-sm">+</span> Add task
-                                </button>
+                                {addingTo === zone.key ? (
+                                    <div className="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={newTaskText}
+                                            onChange={(e) => setNewTaskText(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === "Enter") addItemToBlock(zone.key);
+                                                if (e.key === "Escape") { setAddingTo(null); setNewTaskText(""); }
+                                            }}
+                                            className="flex-1 text-sm font-semibold text-gray-800 bg-transparent border-none outline-none p-0 focus:ring-0"
+                                            placeholder="New task..."
+                                            autoFocus
+                                        />
+                                        <button onClick={() => addItemToBlock(zone.key)} className="text-xs font-bold text-blue-500">Add</button>
+                                        <button onClick={() => { setAddingTo(null); setNewTaskText(""); }} className="text-xs text-gray-400">✕</button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setAddingTo(zone.key)}
+                                        className={`flex items-center gap-1.5 text-xs font-bold ${zone.headerText} opacity-70 hover:opacity-100 transition-opacity`}
+                                    >
+                                        <span className="text-base leading-none">+</span> Add task
+                                    </button>
+                                )}
                             </div>
                         </div>
                     );

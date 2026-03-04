@@ -1,7 +1,5 @@
-import { useState } from "react";
-
 /**
- * Travel Journal Layout — fully dark theme
+ * Travel Journal Layout — light theme
  */
 
 const MOODS = [
@@ -40,27 +38,25 @@ export default function TravelLayout({ template, blocks, setBlocks }) {
 
   return (
     <div className="py-3">
-      {/* Header */}
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-zinc-100">
+        <h2 className="text-xl font-bold text-gray-900">
           {template?.name || "Travel Journal"}
         </h2>
-        <p className="text-sm text-zinc-400 mt-0.5">
+        <p className="text-sm font-medium text-gray-500 mt-0.5">
           {template?.description || "Capture trip memories"}
         </p>
       </div>
 
-      {/* Title + Notes Card */}
-      <div className="bg-zinc-800/60 rounded-2xl border border-zinc-700/50 p-5 mb-5">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-5 hover:border-blue-200 transition-colors">
         {titleBlock && (
-          <div className="border-l-4 border-blue-500/50 pl-4 mb-4">
+          <div className="border-l-4 border-blue-500 pl-4 mb-5">
             <input
               type="text"
               value={titleBlock.data?.text || ""}
               onChange={(e) =>
                 updateBlock(titleBlock.id, { text: e.target.value })
               }
-              className="text-lg font-bold text-zinc-100 bg-transparent border-none outline-none w-full"
+              className="text-lg font-bold text-gray-900 bg-transparent border-none outline-none w-full focus:ring-0 p-0"
               placeholder="Trip title…"
             />
           </div>
@@ -72,37 +68,35 @@ export default function TravelLayout({ template, blocks, setBlocks }) {
             onChange={(e) =>
               updateBlock(notesBlock.id, { text: e.target.value })
             }
-            className="w-full bg-transparent border-none outline-none text-sm text-zinc-300 placeholder-zinc-500 resize-y min-h-[100px] leading-relaxed"
+            className="w-full bg-transparent border-none outline-none text-sm text-gray-700 placeholder-gray-400 font-medium resize-y min-h-[120px] leading-relaxed focus:ring-0 p-0"
             placeholder="Start writing your thoughts and memories…"
           />
         )}
       </div>
 
-      {/* Image Upload Placeholder */}
-      <div className="bg-zinc-800/60 rounded-2xl border border-zinc-700/50 overflow-hidden mb-5">
-        <div className="bg-zinc-700/30 m-4 rounded-xl flex flex-col items-center justify-center py-10 cursor-pointer hover:bg-zinc-700/50 transition-colors">
-          <div className="w-12 h-12 rounded-full bg-zinc-700 flex items-center justify-center mb-2">
-            <span className="text-2xl text-zinc-400">+</span>
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden mb-5 group cursor-pointer hover:border-gray-300 transition-all">
+        <div className="bg-gray-50 m-4 rounded-xl flex flex-col items-center justify-center py-12 group-hover:bg-gray-100 transition-colors border border-dashed border-gray-300">
+          <div className="w-14 h-14 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center mb-3">
+            <span className="text-3xl text-gray-400">+</span>
           </div>
-          <p className="text-xs text-zinc-500 font-medium">Add photos</p>
+          <p className="text-xs text-gray-500 font-bold uppercase tracking-widest">Add photos</p>
         </div>
       </div>
 
-      {/* Mood Selector */}
-      <div className="bg-zinc-800/60 rounded-2xl border border-zinc-700/50 p-5">
-        <h3 className="text-sm font-semibold text-zinc-200 mb-3">How was it?</h3>
-        <div className="flex items-center gap-3 justify-center">
+      <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5">
+        <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest text-center mb-4">How was it?</h3>
+        <div className="flex items-center gap-4 justify-center">
           {MOODS.map((mood) => (
             <button
               key={mood.label}
               type="button"
               onClick={() => setMood(mood.label)}
               className={`
-                w-12 h-12 rounded-full flex items-center justify-center text-2xl
-                transition-all duration-200 active:scale-90
+                w-14 h-14 rounded-full flex items-center justify-center text-3xl
+                transition-all duration-300 active:scale-90
                 ${selectedMood === mood.label
-                  ? "bg-blue-500/20 ring-2 ring-blue-400 ring-offset-2 ring-offset-zinc-900 scale-110"
-                  : "bg-zinc-700/50 hover:bg-zinc-700"
+                  ? "bg-blue-50 ring-4 ring-blue-100 scale-110 shadow-sm"
+                  : "bg-gray-50 hover:bg-gray-100 grayscale hover:grayscale-0"
                 }
               `}
               title={mood.label}
@@ -112,8 +106,8 @@ export default function TravelLayout({ template, blocks, setBlocks }) {
           ))}
         </div>
         {selectedMood && (
-          <p className="text-center text-xs text-zinc-500 mt-2 font-medium">
-            Feeling: {selectedMood}
+          <p className="text-center text-sm text-gray-800 mt-4 font-bold bg-gray-50 w-max mx-auto px-4 py-1.5 rounded-full border border-gray-100">
+            Feeling {selectedMood}
           </p>
         )}
       </div>

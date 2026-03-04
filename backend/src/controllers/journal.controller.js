@@ -8,6 +8,7 @@ import {
 
 } from "../services/journal.service.js";
 import Template from "../models/template.model.js";
+import PageModel from "../models/page.model.js";
 import Journal from "../models/book.model.js"
 /**
  * POST /journals
@@ -75,48 +76,45 @@ export async function listJournals(req, res, next) {
  * GET /journals/:id/open
  * Determine navigation state
  */
+
 export async function openJournal(req, res, next) {
   try {
-    const Journal = await getJournalById(
+    const journal = await getJournalById(
       req.user.userId,
       req.params.id
     );
 
-    if (Journal.isArchived) {
+    if (journal.isArchived) {
       return res.status(403).json({
         message: "Journal is archived",
       });
     }
 
-    /* 🚨 Setup incomplete → choose template */
-    if (Journal.setupStatus !== "READY") {
+    if (!journal.defaultTemplateId) {
       return res.status(200).json({
         status: "SETUP_REQUIRED",
-        JournalId: Journal._id,
-        journalType: Journal.journalType,
+        journalId: journal._id,
+        journalType: journal.journalType,
+        totalPages: 0,
+        lastPageDate: null
       });
     }
 
-    /* 📖 If page exists → open it */
-    if (Journal.currentPageId) {
-      return res.status(200).json({
-        status: "HAS_PAGE",
-        JournalId: Journal._id,
-        pageId: Journal.currentPageId,
-        templateId: Journal.defaultTemplateId,
-      });
-    }
+    const totalPages = journal.totalPages;
+    const lastPageDate = journal.lastPageDate;
 
-    /* 🆕 No page yet → create first page flow */
     return res.status(200).json({
-      status: "NO_PAGE",
-      JournalId: Journal._id,
-      templateId: Journal.defaultTemplateId,
+      status: totalPages ? "HAS_PAGE" : "NO_PAGE",
+      journalId: journal._id,
+      templateId: journal.defaultTemplateId,
+      totalPages,
+      lastPageDate
     });
+
   } catch (err) {
     next(err);
   }
-}
+} 
 export const getTemplatesForJournal = async (req, res) => {
   const { id } = req.params;
 

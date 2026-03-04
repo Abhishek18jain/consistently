@@ -3,23 +3,26 @@ import api from "../../../services/axios";
 export const journalApi = {
   resolveJournal: (journalId) =>
     api.get(`journals/${journalId}/resolver`),
-    openJournal: (journalId) =>
+  openJournal: (journalId) =>
     api.get(`/journals/${journalId}/open`),
 
 
   getJournalById: (journalId) =>
     api.get(`/journals/${journalId}`),
 
-  getJournals: () => api.get("/journals"),
+  getJournals: () => api.get("/journals"), 
 
   createJournal: (payload) =>
     api.post("/journals", payload),
+
+  archiveJournal: (journalId) =>
+    api.put(`/journals/${journalId}/archive`),
 }
 export const templateApi = {
   getTemplatesByType: (type) =>
     api.get(`/templates?type=${type}`),
   getTemplateById: (id) =>
-  api.get(`/templates/${id}`)
+    api.get(`/templates/${id}`)
 };
 
 export const openJournalAPI = (bookId) =>

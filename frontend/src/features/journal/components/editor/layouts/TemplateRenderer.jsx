@@ -9,6 +9,11 @@ import PackingListLayout from "./PackingListLayout";
 import WorkspaceLayout from "./WorkspaceLayout";
 import EnergyPlannerLayout from "./EnergyPlannerLayout";
 import FocusTodoLayout from "./FocusTodoLayout";
+import DailyPlannerLayout from "./DailyPlannerLayout";
+import GoalPlannerLayout from "./GoalPlannerLayout";
+import DailyProductivePlanner from "./DailyProductivePlanner";
+import TimeBlockingPlanner from "./TimeBlockingPlanner";
+
 
 export default function TemplateRenderer({
   template,
@@ -74,7 +79,7 @@ export default function TemplateRenderer({
     );
   }
 
-  if (primaryBlockType === "workspace") {
+  if (primaryBlockType === "workspace" || primaryBlockType === "workspaceWidgets") {
     return (
       <WorkspaceLayout
         page={page}
@@ -85,18 +90,7 @@ export default function TemplateRenderer({
     );
   }
 
-  if (primaryBlockType === "energyPlanner") {
-    return (
-      <EnergyPlannerLayout
-        page={page}
-        template={template}
-        blocks={blocks}
-        setBlocks={setBlocks}
-      />
-    );
-  }
-
-  if (primaryBlockType === "focusTodo") {
+  if (primaryBlockType === "focusTodo" || primaryBlockType === "focusTasks") {
     return (
       <FocusTodoLayout
         page={page}
@@ -107,7 +101,63 @@ export default function TemplateRenderer({
     );
   }
 
+  if (primaryBlockType === "energyPlanner" || primaryBlockType === "energySections") {
+    return (
+      <EnergyPlannerLayout
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "dailyPlanner") {
+    return (
+      <DailyPlannerLayout
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "goalPlanner") {
+    return (
+      <GoalPlannerLayout
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "dailyProductive") {
+    return (
+      <DailyProductivePlanner
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "timeBlocking") {
+    return (
+      <TimeBlockingPlanner
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
   // ── Fallback by template kind/type ──
+
 
   switch (kind) {
     case "todo":

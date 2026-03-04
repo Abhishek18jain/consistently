@@ -6,7 +6,9 @@ import {
   updatePageContent,
   createBlankPage,
   getOrCreatePageByDate,
+  getLatestPage,
 } from "../services/page.service.js";
+
 import { processPageCompletion } from "../services/dailyStats.service.js";
 import Journal from "../models/book.model.js";
 
@@ -54,20 +56,19 @@ export async function nextPage(req, res) {
   try {
     const { journalId, date } = req.params;
 
+    // First check if there's an actual next page
     let page = await getNextPage({ journalId, date });
 
     if (!page) {
-      const nextDate = new Date(date);
-      nextDate.setDate(nextDate.getDate() + 1);
+      // Get the latest page of this journal to compute the true next date
+      const latest = await getLatestPage(journalId);
+      const latestDate = latest?.date || date;
 
-      const nextDateString = nextDate
-        .toISOString()
-        .split("T")[0];
+      const nextDate = new Date(latestDate + "T00:00:00.000Z");
+      nextDate.setUTCDate(nextDate.getUTCDate() + 1);
+      const nextDateString = nextDate.toISOString().split("T")[0];
 
-      page = await createBlankPage({
-        journalId,
-        date: nextDateString,
-      });
+      page = await createBlankPage({ journalId, date: nextDateString });
     }
 
     res.status(200).json(page);
@@ -75,6 +76,7 @@ export async function nextPage(req, res) {
     res.status(500).json({ message: err.message });
   }
 }
+
 
 /* =========================================================
    ⬅️ PREVIOUS PAGE NAVIGATION
@@ -107,6 +109,22 @@ export async function createBlank(req, res) {
     });
 
     res.status(201).json(page);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+}
+
+/* =========================================================
+   📅 GET LATEST PAGE OF A JOURNAL
+========================================================= */
+export async function latestPage(req, res) {
+  try {
+    const { journalId } = req.params;
+    const page = await getLatestPage(journalId);
+    if (!page) {
+      return res.status(404).json({ message: "No pages found" });
+    }
+    res.status(200).json(page);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -167,6 +185,39 @@ export async function updatePage(req, res) {
     });
   } catch (err) {
     console.error("UPDATE PAGE ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+}
+
+/* =========================================================
+   🗑️ DELETE PAGE
+========================================================= */
+export async function deletePage(req, res) {
+  try {
+    const { pageId } = req.params;
+    const Page = (await import("../models/page.model.js")).default;
+    const Book = (await import("../models/book.model.js")).default;
+
+    const page = await Page.findById(pageId);
+    if (!page) {
+      return res.status(404).json({ message: "Page not found" });
+    }
+
+    // Decrement journal totalPages
+    await Book.findByIdAndUpdate(page.journalId, {
+      $inc: { totalPages: -1 },
+    });
+
+    // Delete daily stats for this page
+    const DailyStats = (await import("../models/daily.model.js")).default;
+    await DailyStats.deleteOne({ pageId: page._id });
+
+    // Delete the page
+    await Page.findByIdAndDelete(pageId);
+
+    res.status(200).json({ message: "Page deleted", pageId });
+  } catch (err) {
+    console.error("DELETE PAGE ERROR:", err);
     res.status(500).json({ message: err.message });
   }
 }

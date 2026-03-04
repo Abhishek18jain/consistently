@@ -1,41 +1,41 @@
 import { useState } from "react";
 
 /**
- * Eisenhower Matrix Layout — fully dark theme
+ * Eisenhower Matrix Layout — fully light theme
  */
 
 const QUADRANT_STYLES = [
   {
     label: "Urgent & Important",
-    labelColor: "text-red-400",
-    bg: "bg-red-500/10",
-    border: "border-red-500/30",
-    cardBg: "bg-zinc-800/60",
-    accent: "border-l-red-500/60",
+    labelColor: "text-red-700",
+    bg: "bg-red-100",
+    border: "border-red-200",
+    cardBg: "bg-white",
+    accent: "border-l-red-500",
   },
   {
     label: "Important Not Urgent",
-    labelColor: "text-blue-400",
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/30",
-    cardBg: "bg-zinc-800/60",
-    accent: "border-l-blue-500/60",
+    labelColor: "text-blue-700",
+    bg: "bg-blue-100",
+    border: "border-blue-200",
+    cardBg: "bg-white",
+    accent: "border-l-blue-500",
   },
   {
     label: "Urgent Not Important",
-    labelColor: "text-amber-400",
-    bg: "bg-amber-500/10",
-    border: "border-amber-500/30",
-    cardBg: "bg-zinc-800/60",
-    accent: "border-l-amber-500/60",
+    labelColor: "text-amber-700",
+    bg: "bg-amber-100",
+    border: "border-amber-200",
+    cardBg: "bg-white",
+    accent: "border-l-amber-500",
   },
   {
     label: "Not Urgent Not Important",
-    labelColor: "text-emerald-400",
-    bg: "bg-emerald-500/10",
-    border: "border-emerald-500/30",
-    cardBg: "bg-zinc-800/60",
-    accent: "border-l-emerald-500/60",
+    labelColor: "text-emerald-700",
+    bg: "bg-emerald-100",
+    border: "border-emerald-200",
+    cardBg: "bg-white",
+    accent: "border-l-emerald-500",
   },
 ];
 
@@ -101,15 +101,15 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
     <div className="py-3">
       {/* Header */}
       <div className="mb-6 text-center">
-        <h2 className="text-xl font-bold text-zinc-100">
+        <h2 className="text-xl font-bold text-gray-900">
           {template?.name || "Eisenhower Matrix"}
         </h2>
-        <p className="text-sm text-zinc-400 mt-1">
+        <p className="text-sm text-gray-500 mt-1">
           {template?.description || "Prioritize tasks by urgency and importance"}
         </p>
       </div>
 
-      {/* 2×2 Grid */}
+      {/* 2x2 Grid */}
       <div className="grid grid-cols-2 gap-3">
         {quadrants.map((quad, qi) => {
           const style = QUADRANT_STYLES[qi];
@@ -118,12 +118,12 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
               key={qi}
               className={`
                 rounded-2xl overflow-hidden border ${style.border}
-                min-h-[180px] flex flex-col bg-zinc-800/40
+                min-h-[180px] flex flex-col bg-gray-50 shadow-sm
               `}
             >
               {/* Quadrant Label Header */}
-              <div className={`${style.bg} px-3 py-2`}>
-                <h3 className={`text-[11px] font-semibold uppercase tracking-wider ${style.labelColor}`}>
+              <div className={`${style.bg} px-3 py-2 border-b ${style.border}`}>
+                <h3 className={`text-[11px] font-bold uppercase tracking-wider ${style.labelColor}`}>
                   {style.label}
                 </h3>
               </div>
@@ -135,8 +135,8 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
                     key={ii}
                     className={`
                       group ${style.cardBg} rounded-xl p-2.5
-                      border-l-3 ${style.accent}
-                      hover:bg-zinc-700/50 transition-colors
+                      border border-gray-200 border-l-4 ${style.accent}
+                      hover:shadow-sm hover:border-gray-300 transition-all
                       flex items-start gap-2
                     `}
                   >
@@ -145,10 +145,10 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
                       onClick={() => toggleItem(qi, ii)}
                       className={`
                         flex-shrink-0 w-4 h-4 rounded border-2 mt-0.5
-                        flex items-center justify-center transition-all
+                        flex items-center justify-center transition-all cursor-pointer
                         ${item.checked
                           ? "bg-emerald-500 border-emerald-500 text-white"
-                          : "border-zinc-500 hover:border-zinc-400 bg-zinc-700/50"
+                          : "border-gray-300 hover:border-emerald-400 bg-white"
                         }
                       `}
                     >
@@ -165,7 +165,8 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
                       onChange={(e) => updateItemText(qi, ii, e.target.value)}
                       className={`
                         flex-1 bg-transparent border-none outline-none text-xs font-medium
-                        ${item.checked ? "line-through text-zinc-500" : "text-zinc-200"}
+                        focus:ring-0 p-0
+                        ${item.checked ? "line-through text-gray-400" : "text-gray-800"}
                       `}
                       placeholder="New task…"
                     />
@@ -177,11 +178,11 @@ export default function MatrixLayout({ template, blocks, setBlocks }) {
                 type="button"
                 onClick={() => addItem(qi)}
                 className={`
-                  mx-3 mb-2 flex items-center gap-1 text-[11px] font-medium
+                  mx-3 mb-3 flex items-center gap-1.5 text-[11px] font-semibold
                   ${style.labelColor} opacity-70 hover:opacity-100 transition-opacity
                 `}
               >
-                <span className="text-xs">+</span> Add task
+                <span className="text-base leading-none">+</span> Add task
               </button>
             </div>
           );

@@ -36,23 +36,32 @@ export function calculateCompletionFromBlocks(blocks = [], journalType = "blank"
   let completedTasks = 0;
 
   for (const block of blocks) {
+    // Standard checklist blocks
     if (block.type === "checklist") {
       const items = Array.isArray(block.data?.items) ? block.data.items : [];
-
       for (const item of items) {
-        // Items can be strings or objects
         if (typeof item === "string") {
-          if (item.trim()) {
-            totalTasks++;
-            // String items can't be checked
-          }
+          if (item.trim()) totalTasks++;
         } else if (item && typeof item === "object") {
           const text = item.text?.trim?.() || "";
           if (text) {
             totalTasks++;
-            if (item.checked) {
-              completedTasks++;
-            }
+            if (item.checked) completedTasks++;
+          }
+        }
+      }
+    }
+
+    // Special block types — focusTasks, dailyPlanner, goalPlanner
+    // These are stored as blocks with special types but contain items in data
+    if (["focusTasks", "dailyPlanner", "goalPlanner", "energySections", "habitGrid", "dailyProductive", "timeBlocking"].includes(block.type)) {
+      const items = block.data?.items || block.data?.tasks || [];
+      if (Array.isArray(items)) {
+        for (const item of items) {
+          const text = typeof item === "string" ? item : item?.text || "";
+          if (text.trim()) {
+            totalTasks++;
+            if (item?.checked) completedTasks++;
           }
         }
       }
@@ -82,6 +91,7 @@ export function calculateCompletionFromBlocks(blocks = [], journalType = "blank"
     completedTasks,
   };
 }
+
 
 /**
  * Legacy: Calculate completion percentage for a page using template rules

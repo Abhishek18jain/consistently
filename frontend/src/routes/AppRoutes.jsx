@@ -109,6 +109,18 @@ export default function AppRoutes() {
           }
         />
 
+        {/* 🔑 Template alias (from JournalCard menu) */}
+        <Route
+          path="/journal/:journalId/templates"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <TemplateSelection />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
       </Routes>
     </BrowserRouter>
   );

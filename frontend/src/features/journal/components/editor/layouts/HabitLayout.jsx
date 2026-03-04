@@ -1,18 +1,18 @@
 import { useMemo } from "react";
 
 /**
- * Habit Tracker Layout — fully dark theme
+ * Habit Tracker Layout — light theme
  */
 
 const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const HABIT_COLORS = [
-    { ring: "border-emerald-500/50", fill: "bg-emerald-500", text: "text-emerald-400", tag: "bg-emerald-500/20 text-emerald-400" },
-    { ring: "border-orange-500/50", fill: "bg-orange-500", text: "text-orange-400", tag: "bg-orange-500/20 text-orange-400" },
-    { ring: "border-blue-500/50", fill: "bg-blue-500", text: "text-blue-400", tag: "bg-blue-500/20 text-blue-400" },
-    { ring: "border-purple-500/50", fill: "bg-purple-500", text: "text-purple-400", tag: "bg-purple-500/20 text-purple-400" },
-    { ring: "border-rose-500/50", fill: "bg-rose-500", text: "text-rose-400", tag: "bg-rose-500/20 text-rose-400" },
-    { ring: "border-teal-500/50", fill: "bg-teal-500", text: "text-teal-400", tag: "bg-teal-500/20 text-teal-400" },
+    { ring: "border-emerald-200", fill: "bg-emerald-500", text: "text-emerald-700", tag: "bg-emerald-100 text-emerald-700 font-bold" },
+    { ring: "border-orange-200", fill: "bg-orange-500", text: "text-orange-700", tag: "bg-orange-100 text-orange-700 font-bold" },
+    { ring: "border-blue-200", fill: "bg-blue-500", text: "text-blue-700", tag: "bg-blue-100 text-blue-700 font-bold" },
+    { ring: "border-purple-200", fill: "bg-purple-500", text: "text-purple-700", tag: "bg-purple-100 text-purple-700 font-bold" },
+    { ring: "border-rose-200", fill: "bg-rose-500", text: "text-rose-700", tag: "bg-rose-100 text-rose-700 font-bold" },
+    { ring: "border-teal-200", fill: "bg-teal-500", text: "text-teal-700", tag: "bg-teal-100 text-teal-700 font-bold" },
 ];
 
 export default function HabitLayout({ template, blocks, setBlocks }) {
@@ -78,17 +78,20 @@ export default function HabitLayout({ template, blocks, setBlocks }) {
         <div className="py-3">
             {/* Header */}
             <div className="mb-6 text-center">
-                <h2 className="text-xl font-bold text-zinc-100">
+                <h2 className="text-xl font-bold text-gray-900">
                     {template?.name || "Habit Planner"}
                 </h2>
-                <p className="text-sm text-zinc-400 mt-0.5">
+                <p className="text-sm text-gray-500 mt-0.5">
                     {template?.description || "Track your daily habits"}
                 </p>
             </div>
 
-            <h3 className="text-sm font-semibold text-zinc-300 mb-4 px-1">Habit List</h3>
+            <div className="flex items-center justify-between mb-4 px-1 border-b border-gray-200 pb-2">
+                <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Habit List</h3>
+                <span className="text-xs font-semibold text-gray-400">{habits.length} habits</span>
+            </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {habits.map((habit, hi) => {
                     const color = HABIT_COLORS[hi % HABIT_COLORS.length];
                     const daysCompleted = Object.values(habit.days).filter(Boolean).length;
@@ -96,56 +99,56 @@ export default function HabitLayout({ template, blocks, setBlocks }) {
                     return (
                         <div
                             key={hi}
-                            className="bg-zinc-800/60 rounded-2xl p-4 border border-zinc-700/50"
+                            className="bg-white shadow-sm rounded-2xl p-4 border border-gray-200 hover:border-gray-300 transition-all"
                         >
-                            <div className="flex items-center justify-between mb-1">
+                            <div className="flex items-center justify-between mb-2">
                                 <input
                                     type="text"
                                     value={habit.text}
                                     onChange={(e) => updateHabitName(hi, e.target.value)}
-                                    className="font-semibold text-sm text-zinc-100 bg-transparent border-none outline-none flex-1"
+                                    className="font-bold text-sm text-gray-900 bg-transparent border-none outline-none flex-1 focus:ring-0 p-0"
                                     placeholder="Habit name…"
                                 />
                                 <button
                                     type="button"
                                     onClick={() => removeHabit(hi)}
-                                    className="text-zinc-500 hover:text-red-400 text-xs p-1 transition-colors"
+                                    className="text-gray-400 hover:text-red-500 hover:bg-red-50 w-6 h-6 rounded-md flex items-center justify-center transition-all"
                                 >
                                     ✕
                                 </button>
                             </div>
 
                             {daysCompleted > 0 && (
-                                <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-md mb-3 ${color.tag}`}>
-                                    {daysCompleted}d
+                                <span className={`inline-block text-[10px] px-2.5 py-1 rounded-full mb-3 uppercase tracking-wide ${color.tag}`}>
+                                    {daysCompleted} / 7 Days
                                 </span>
                             )}
 
-                            <div className="flex items-center justify-between mt-1">
+                            <div className="flex items-center justify-between mt-2 pt-3 border-t border-gray-100">
                                 {DAYS.map((day) => {
                                     const dayKey = day.toLowerCase();
                                     const isActive = !!habit.days[dayKey];
 
                                     return (
                                         <div key={day} className="flex flex-col items-center gap-1.5">
-                                            <span className="text-[10px] text-zinc-500 font-medium">
+                                            <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">
                                                 {day}
                                             </span>
                                             <button
                                                 type="button"
                                                 onClick={() => toggleDay(hi, day)}
                                                 className={`
-                          w-7 h-7 rounded-full border-2 flex items-center justify-center
-                          transition-all duration-200 active:scale-90
+                          w-8 h-8 rounded-full border-2 flex items-center justify-center
+                          transition-all duration-300 active:scale-90 cursor-pointer
                           ${isActive
-                                                        ? `${color.fill} border-transparent text-white`
-                                                        : `bg-zinc-700/50 ${color.ring}`
+                                                        ? `${color.fill} border-transparent text-white shadow-md shadow-${color.fill.replace('bg-', '')}/30`
+                                                        : `bg-gray-50 hover:bg-gray-100 ${color.ring}`
                                                     }
                         `}
                                             >
                                                 {isActive && (
-                                                    <svg className="w-3.5 h-3.5" viewBox="0 0 12 12" fill="none">
-                                                        <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                                    <svg className="w-4 h-4" viewBox="0 0 12 12" fill="none">
+                                                        <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
                                                     </svg>
                                                 )}
                                             </button>
@@ -161,18 +164,18 @@ export default function HabitLayout({ template, blocks, setBlocks }) {
             <button
                 type="button"
                 onClick={addHabit}
-                className="mt-4 w-full py-3 rounded-2xl border-2 border-dashed border-zinc-700
-                   text-sm font-medium text-zinc-500 hover:border-blue-500/50
-                   hover:text-blue-400 transition-colors flex items-center justify-center gap-1.5"
+                className="mt-5 w-full py-3.5 rounded-2xl border-2 border-dashed border-gray-300
+                   text-sm font-bold text-gray-500 bg-gray-50 hover:bg-gray-100 hover:border-gray-400
+                   hover:text-gray-800 transition-all flex items-center justify-center gap-2"
             >
-                <span className="text-lg leading-none">+</span> Add Habit
+                <span className="text-xl leading-none font-medium">+</span> Add Habit
             </button>
 
             {totalChecked > 0 && (
-                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-zinc-400">
-                    <span>🔥</span>
-                    <span className="font-medium">Current Streak</span>
-                    <span className="font-bold text-zinc-200">{totalChecked} days</span>
+                <div className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-600 bg-orange-50 border border-orange-100 py-2.5 px-4 rounded-xl mx-auto w-max">
+                    <span className="text-xl">🔥</span>
+                    <span className="font-semibold">Weekly Streak</span>
+                    <span className="font-bold text-orange-600">{totalChecked} completed</span>
                 </div>
             )}
         </div>

@@ -26,8 +26,11 @@ export default function AppNavbar() {
 
         {/* Logo */}
         <Link to={isAuthenticated ? "/dashboard" : "/"} className="flex items-center gap-2">
-          <span className="text-lg font-bold text-gray-900 tracking-tight">
-            ConsistIQ
+          <div className="w-7 h-7 bg-gray-900 rounded-lg flex items-center justify-center">
+            <span className="text-white text-xs font-black">C</span>
+          </div>
+          <span className="text-base font-bold text-gray-900 tracking-tight">
+            Consistently
           </span>
         </Link>
 

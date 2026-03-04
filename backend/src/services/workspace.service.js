@@ -1,6 +1,7 @@
 import Book from "../models/book.model.js";
 import DailyStats from "../models/daily.model.js";
 import User from "../models/user.model.js";
+import Page from "../models/page.model.js";
 
 export async function getWorkspaceStatus(userId) {
 
@@ -25,39 +26,60 @@ export async function getWorkspaceStatus(userId) {
       totalActiveDays: 0,
       risk: "safe",
       hoursLeftToday: 24,
+      latestBookId: null,
     };
   }
 
   const journalsCount = books.length;
-  const latestBookId = books[0]._id;
+  const latestBook = books[0];
+  const latestBookId = latestBook._id;
 
-  /* ================= TODAY'S STATS ================= */
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
+  /* ================= TODAY'S DATE ================= */
+  const todayStr = new Date().toISOString().split("T")[0]; // "2026-03-05"
 
-  const todayStats = await DailyStats.findOne({
+  /* ================= TODAY'S STATS (try DailyStats first) ================= */
+  // Try both: a date string match and a Date object match
+  let todayStats = await DailyStats.findOne({
     userId,
-    date: today,
-    excluded: false,
+    $or: [
+      { date: { $eq: todayStr } },
+      { date: { $gte: new Date(todayStr + "T00:00:00.000Z"), $lte: new Date(todayStr + "T23:59:59.999Z") } },
+    ],
   }).lean();
 
-  const completionToday = todayStats?.completion || 0;
-  const mode = todayStats ? "active" : "no_pages";
+  // If no DailyStats yet today, check if any page was written today across any journal
+  let completionToday = todayStats?.completion || 0;
+  let hasPageToday = false;
+
+  if (!todayStats) {
+    const pageToday = await Page.findOne({
+      journalId: { $in: books.map(b => b._id) },
+      $or: [
+        { date: todayStr },
+        { date: { $gte: new Date(todayStr + "T00:00:00.000Z"), $lte: new Date(todayStr + "T23:59:59.999Z") } },
+      ],
+    }).lean();
+    hasPageToday = !!pageToday;
+  } else {
+    hasPageToday = true;
+    completionToday = todayStats.completion || 0;
+  }
+
+  const mode = hasPageToday ? "active" : "no_pages";
 
   /* ================= HISTORICAL STATS ================= */
-  const allStats = await DailyStats.find({
-    userId,
-    excluded: false,
-  }).lean();
+  const allStats = await DailyStats.find({ userId }).lean();
+  const trackableStats = allStats.filter(s => !s.excluded);
 
-  const totalActiveDays = allStats.length;
+  const totalActiveDays = trackableStats.length;
   const avgCompletion = totalActiveDays > 0
-    ? Math.round(allStats.reduce((s, d) => s + d.completion, 0) / totalActiveDays)
+    ? Math.round(trackableStats.reduce((s, d) => s + (d.completion || 0), 0) / totalActiveDays)
     : 0;
 
   /* ================= RISK ================= */
   let risk = "safe";
-  if (completionToday < 40) risk = "danger";
+  if (!hasPageToday) risk = "danger";
+  else if (completionToday < 40) risk = "danger";
   else if (completionToday < 70) risk = "warning";
 
   /* ================= TIME LEFT ================= */
@@ -70,7 +92,7 @@ export async function getWorkspaceStatus(userId) {
   return {
     mode,
     journalsCount,
-    latestBookId,
+    latestBookId: latestBookId.toString(),
 
     completionToday,
     streak,

@@ -7,21 +7,30 @@ import {
   nextPage,
   previousPage,
   updatePage,
-  createBlank
+  createBlank,
+  latestPage,
+  deletePage,
 } from "../controllers/page.controller.js";
+
 import { requireAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/from-template",requireAuth, createFromTemplate);
-router.post("/blank",requireAuth,createBlank );
+router.post("/from-template", requireAuth, createFromTemplate);
+router.post("/blank", requireAuth, createBlank);
 
-router.get("/:journalId/:date",requireAuth, getPage);
+// ⚠️ IMPORTANT: /latest must come BEFORE /:journalId/:date to avoid conflict
+router.get("/:journalId/latest", requireAuth, latestPage);
 
-router.get("/:journalId/:date/next",requireAuth, nextPage);
+router.get("/:journalId/:date", requireAuth, getPage);
 
-router.get("/:journalId/:date/previous",requireAuth, previousPage);
+router.get("/:journalId/:date/next", requireAuth, nextPage);
 
-router.patch("/:pageId",requireAuth, updatePage);
+router.get("/:journalId/:date/previous", requireAuth, previousPage);
+
+router.patch("/:pageId", requireAuth, updatePage);
+
+// 🗑️ Delete a page
+router.delete("/:pageId", requireAuth, deletePage);
 
 export default router;
