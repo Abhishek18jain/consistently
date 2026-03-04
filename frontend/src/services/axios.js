@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../app/store";
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api"
+  baseURL: "https://consistently-15d8.onrender.com || http://localhost:5000/api"
 });
 
 api.interceptors.request.use((config) => {
