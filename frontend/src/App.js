@@ -3,10 +3,14 @@ import { useDispatch } from "react-redux";
 import { setToken } from "./features/auth/auth.slice";
 import AppRoutes from "./routes/AppRoutes";
 import { Toaster } from "react-hot-toast";
-
+import { keepBackendAlive } from "./features/journal/utils/keepBackendAlive";
 function App() {
   const dispatch = useDispatch();
   const [ready, setReady] = useState(false);
+  useEffect(() => {
+    keepBackendAlive();
+  }, []);
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
