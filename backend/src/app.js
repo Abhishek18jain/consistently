@@ -8,7 +8,8 @@ const app = express();
 
 const allowedOrigins = [
   "http://localhost:3000",
-  "https://consistently-e4p7l30hk-abhishek18jains-projects.vercel.app"
+  "https://consistently-e4p7l30hk-abhishek18jains-projects.vercel.app",
+  "https://consistently-2k41mu7dh-abhishek18jains-projects.vercel.app"
 ];
 
 app.use(
