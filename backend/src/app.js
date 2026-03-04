@@ -10,6 +10,7 @@ app.use(cors({
   origin: [
     "http://localhost:3000",
     "https://consistently-ozsslofoh-abhishek18jains-projects.vercel.app",
+    "https://consistently-e4p7l30hk-abhishek18jains-projects.vercel.app/"
   ],  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
