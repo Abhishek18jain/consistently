@@ -1,31 +1,26 @@
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
+
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false,
-  family: 4, // FORCE IPv4
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-    tls: {
-    rejectUnauthorized: false
-  }
-});
-  transporter.verify().then(console.log ,"transported").catch(console.error,"transported");
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export const sendOTPemail = async (email, otp, purpose) => {
   try {
-    await transporter.sendMail({
-      from: `"Journal App" <${process.env.EMAIL_USER}>`,
+    await resend.emails.send({
+      from: `Journal App <${process.env.EMAIL_FROM}>`,
       to: email,
       subject: `Your OTP for ${purpose}`,
-      text: `Your OTP is ${otp}. It will expire in 10 minutes.`,
+      html: `
+        <div style="font-family:sans-serif">
+          <h2>Your OTP Code</h2>
+          <p>Your OTP for <b>${purpose}</b> is:</p>
+          <h1 style="letter-spacing:4px">${otp}</h1>
+          <p>This OTP will expire in 10 minutes.</p>
+        </div>
+      `
     });
- 
+
   } catch (err) {
     console.error("Email send failed:", err);
     throw new Error("Could not send OTP email");
