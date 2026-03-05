@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { verifyEmail,  } from "../auth.slice";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../../../components/layouts/AuthLayout";
 import toast from "react-hot-toast";
 
@@ -169,12 +169,11 @@ const [showSuccessPopup, setShowSuccessPopup] = useState(false);
             )}
           </div> */}
               {/* BACK */}
-          <p
-            onClick={() => navigate("/register")}
+          <Link to = "/register"
             className="text-center text-sm text-gray-500 cursor-pointer hover:text-gray-300"
           >
-            ← Back to registration
-          </p>
+           ← Back to registration
+          </Link>
 
         </form>
         {showSuccessPopup && (
