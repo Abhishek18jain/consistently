@@ -91,12 +91,28 @@ export default function usePageData({ journalId, date, navigate }) {
   }, [blocks]);
 
   // NAVIGATION
-  const goNext = () => {
-    navigate(`/journals/${journalId}/date/${getNextDate(date)}`);
+  const goNext = async () => {
+    try {
+      const res = await pageApi.getNextPage(journalId, date);
+      if (res.data && res.data.date) {
+        navigate(`/journals/${journalId}/date/${res.data.date}`);
+      }
+    } catch (err) {
+      console.error("Next page error:", err);
+    }
   };
 
-  const goPrevious = () => {
-    navigate(`/journals/${journalId}/date/${getPrevDate(date)}`);
+  const goPrevious = async () => {
+    try {
+      const res = await pageApi.getPreviousPage(journalId, date);
+      if (res.data && res.data.date) {
+        navigate(`/journals/${journalId}/date/${res.data.date}`);
+      } else {
+        console.log("No previous page");
+      }
+    } catch (err) {
+      console.error("Previous page error:", err);
+    }
   };
 
   return {

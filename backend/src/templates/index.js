@@ -116,6 +116,49 @@ export const templates = [
     ]
   },
 
+  // ===== CODER =====
+  {
+    name: "Algorithm Revision Planner",
+    type: "coder",
+    description: "Track DSA topics, easy/medium/hard, and revision dates",
+    thumbnail: "/templates/coder.png",
+    tags: ["dsa", "algorithms", "revision"],
+    blocks: [{ type: "algoRevision" }]
+  },
+  {
+    name: "Coding Project Tracker",
+    type: "coder",
+    description: "Manage projects, tech stack, tasks, and bugs",
+    thumbnail: "/templates/coder.png",
+    tags: ["project", "tasks", "bugs"],
+    blocks: [{ type: "codingProjectTracker" }]
+  },
+  {
+    name: "Coding Learning Journal",
+    type: "coder",
+    description: "Daily reflections on concepts, problems, and solutions",
+    thumbnail: "/templates/coder.png",
+    tags: ["learning", "journal"],
+    blocks: [{ type: "codingLearningJournal" }]
+  },
+  {
+    name: "DSA Problem Tracker",
+    type: "coder",
+    description: "List solved DSA problems by topic and difficulty",
+    thumbnail: "/templates/coder.png",
+    tags: ["dsa", "problems"],
+    blocks: [{ type: "dsaProblemTracker" }]
+  },
+
+  {
+    name: "Coding Progress Dashboard",
+    type: "coder",
+    description: "Track coding streaks, problems solved, and difficulty distribution",
+    thumbnail: "/templates/coder.png",
+    tags: ["dashboard", "progress", "stats"],
+    blocks: [{ type: "codingProgressDashboard" }]
+  },
+
   // ===== BLANK =====
   {
     name: "Brain Dump",

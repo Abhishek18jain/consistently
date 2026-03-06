@@ -51,14 +51,22 @@ export async function verifyOtp({ email, otp }) {
 
   // remove temp record
   await PendingUserModel.deleteOne({ email });
+
+  const token = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  return { token };
 }
 
 
 export async function loginUser({ email, password }) {
-  
+
   // console.log("email", email , password);
   email = email.toLowerCase().trim();
-  const user = await User.findOne({ email }).select("+password");  
+  const user = await User.findOne({ email }).select("+password");
 
   console.log("USER:", user);
   if (!user) throw new Error("Invalid credentials");
@@ -66,7 +74,7 @@ export async function loginUser({ email, password }) {
   console.log("HASHED PASSWORD:", user?.password);
   if (!user.isVerified) throw new Error("Email not verified");
   const isMatch = await bcrypt.compare(password, user.password);
-console.log(isMatch);
+  console.log(isMatch);
 
   if (!isMatch) throw new Error("Invalid credentials");
 

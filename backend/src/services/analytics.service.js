@@ -41,15 +41,19 @@ export async function getDashboardAnalytics(userId) {
     const dateStr = d.toISOString().split("T")[0];
     const normalizedDay = new Date(dateStr + "T00:00:00.000Z");
 
-    const stat = allStats.find((s) => {
+    const statsForDay = allStats.filter((s) => {
       const statDate = new Date(s.date).toISOString().split("T")[0];
       return statDate === dateStr;
     });
 
+    const maxCompletionOfDay = statsForDay.length > 0
+      ? Math.max(...statsForDay.map(s => s.completion))
+      : 0;
+
     weeklyData.push({
       day: dayNames[d.getDay()],
       date: dateStr,
-      value: stat?.completion || 0,
+      value: maxCompletionOfDay,
     });
   }
 

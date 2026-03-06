@@ -1,4 +1,4 @@
-import { useState } from "react";
+// Goal Planner Layout
 
 /**
  * Goal Planner Layout - Light theme
@@ -21,8 +21,8 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
         { text: "Launch product website", checked: false }
     ];
 
-    const [goalTitle, setGoalTitle] = useState("Launch New Product");
-    const [dueDate, setDueDate] = useState("Sep 30, 2024");
+    const goalTitle = titleBlock?.data?.text || "Launch New Product";
+    const dueDate = deadlineBlock?.data?.text?.split("\n")[0] || "Sep 30, 2024";
 
     const completedSteps = steps.filter(s => (typeof s === "string" ? false : s.checked)).length;
     const totalSteps = steps.length;
@@ -56,6 +56,12 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
         updateBlock(stepsBlock.id, { items: newItems });
     };
 
+    const addStep = () => {
+        if (!stepsBlock) return;
+        const newItems = [...steps, { text: "New step...", checked: false }];
+        updateBlock(stepsBlock.id, { items: newItems });
+    };
+
     // SVG Circle properties
     const radius = 35;
     const circumference = 2 * Math.PI * radius;
@@ -78,9 +84,8 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
                     <div className="flex-1 pr-4">
                         <input
                             type="text"
-                            value={titleBlock?.data?.text || goalTitle}
+                            value={goalTitle}
                             onChange={(e) => {
-                                setGoalTitle(e.target.value);
                                 if (titleBlock) updateBlock(titleBlock.id, { text: e.target.value });
                             }}
                             className="text-xl font-bold text-gray-900 bg-transparent border-none outline-none w-full p-0 focus:ring-0"
@@ -90,8 +95,14 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
                             <span>Due</span>
                             <input
                                 value={dueDate}
-                                onChange={(e) => setDueDate(e.target.value)}
-                                className="bg-transparent border-none p-0 min-w-0"
+                                onChange={(e) => {
+                                    if (deadlineBlock) {
+                                        const lines = (deadlineBlock.data?.text || "").split("\n");
+                                        lines[0] = e.target.value;
+                                        updateBlock(deadlineBlock.id, { text: lines.join("\n") });
+                                    }
+                                }}
+                                className="bg-transparent border-none p-0 min-w-0 outline-none focus:ring-0"
                             />
                             <span className="text-gray-400">📅</span>
                         </div>
@@ -175,6 +186,12 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
                         );
                     })}
                 </div>
+                <button
+                    onClick={addStep}
+                    className="mt-4 flex items-center gap-2 text-xs font-semibold text-blue-500 hover:text-blue-600 transition-colors"
+                >
+                    <span className="text-base leading-none">+</span> Add new task
+                </button>
             </div>
 
             {/* Deadline info */}
@@ -184,11 +201,12 @@ export default function GoalPlannerLayout({ template, blocks, setBlocks }) {
                     <span className="text-sm font-semibold text-gray-600">{dueDate}</span>
                 </div>
                 <textarea
-                    value={deadlineBlock?.data?.text || "• Beta test with selected users\n• Prepare launch event"}
+                    value={deadlineBlock?.data?.text || ""}
                     onChange={(e) => {
                         if (deadlineBlock) updateBlock(deadlineBlock.id, { text: e.target.value });
                     }}
                     className="w-full bg-transparent border-none outline-none text-sm text-gray-600 font-medium placeholder-gray-400 min-h-[60px] resize-none focus:ring-0 p-0"
+                    placeholder="Add deadline notes..."
                 />
             </div>
 

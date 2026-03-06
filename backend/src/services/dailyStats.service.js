@@ -24,7 +24,7 @@ export async function processPageCompletion({
   journalType,
 }) {
   // 1. Calculate completion from blocks
-  const completionData = calculateCompletionFromBlocks(blocks, journalType);
+  const completionData = calculateCompletionFromBlocks(blocks, journalType, date);
 
   // 2. Normalize date for DailyStats
   const normalizedDate = new Date(date + "T00:00:00.000Z");
@@ -50,6 +50,7 @@ export async function processPageCompletion({
   const dailyStats = await DailyStats.findOneAndUpdate(
     {
       userId,
+      bookId: journalId,
       date: normalizedDate,
     },
     statsData,

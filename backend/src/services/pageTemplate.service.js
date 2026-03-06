@@ -128,6 +128,13 @@ function buildFallbackStructure(template) {
     case "quickNotes":
       return [makeTextBlock("")];
 
+    case "algoRevision":
+    case "codingProjectTracker":
+    case "codingLearningJournal":
+    case "dsaProblemTracker":
+    case "codingProgressDashboard":
+      return [makeChecklistBlock(["Item 1"])];
+
     default:
       if (template?.type === "todo") {
         return [

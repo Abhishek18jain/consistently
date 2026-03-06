@@ -9,6 +9,7 @@ const JOURNAL_ICONS = {
   planner: "📋",
   travel: "✈️",
   blank: "📄",
+  coder: "💻",
 };
 
 export default function JournalCard({ journal, onDelete }) {

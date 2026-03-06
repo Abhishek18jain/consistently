@@ -19,10 +19,11 @@ export const pageApi = {
     }),
 
   /* TEMPLATE */
-  createFromTemplate: (journalId, templateId) =>
+  createFromTemplate: (journalId, templateId, targetDate) =>
     api.post("/pages/from-template", {
       journalId,
       templateId,
+      targetDate,
     }),
 
   /* GET LATEST PAGE */

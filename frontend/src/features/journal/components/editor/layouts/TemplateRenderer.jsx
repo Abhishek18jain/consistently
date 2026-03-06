@@ -14,6 +14,12 @@ import GoalPlannerLayout from "./GoalPlannerLayout";
 import DailyProductivePlanner from "./DailyProductivePlanner";
 import TimeBlockingPlanner from "./TimeBlockingPlanner";
 
+import AlgorithmRevisionPlanner from "./AlgorithmRevisionPlanner";
+import CodingProjectTracker from "./CodingProjectTracker";
+import CodingLearningJournal from "./CodingLearningJournal";
+import DSAProblemTracker from "./DSAProblemTracker";
+import CodingProgressDashboard from "./CodingProgressDashboard";
+
 
 export default function TemplateRenderer({
   template,
@@ -148,6 +154,61 @@ export default function TemplateRenderer({
   if (primaryBlockType === "timeBlocking") {
     return (
       <TimeBlockingPlanner
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "algoRevision") {
+    return (
+      <AlgorithmRevisionPlanner
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "codingProjectTracker") {
+    return (
+      <CodingProjectTracker
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "codingLearningJournal") {
+    return (
+      <CodingLearningJournal
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "dsaProblemTracker") {
+    return (
+      <DSAProblemTracker
+        page={page}
+        template={template}
+        blocks={blocks}
+        setBlocks={setBlocks}
+      />
+    );
+  }
+
+  if (primaryBlockType === "codingProgressDashboard") {
+    return (
+      <CodingProgressDashboard
         page={page}
         template={template}
         blocks={blocks}

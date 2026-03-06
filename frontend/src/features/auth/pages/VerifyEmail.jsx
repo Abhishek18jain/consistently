@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { verifyEmail,  } from "../auth.slice";
+import { verifyEmail, } from "../auth.slice";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import AuthLayout from "../../../components/layouts/AuthLayout";
 import toast from "react-hot-toast";
@@ -19,7 +19,7 @@ export default function VerifyEmail() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(60);
   const [redirectTimer, setRedirectTimer] = useState(3);
-const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
 
   /* ===== TIMER ===== */
@@ -39,23 +39,23 @@ const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   useEffect(() => {
     if (verified) {
       toast.success("Email verified successfully");
-        setShowSuccessPopup(true);
+      setShowSuccessPopup(true);
     }
   }, [verified]);
   useEffect(() => {
-  if (!showSuccessPopup) return;
+    if (!showSuccessPopup) return;
 
-  if (redirectTimer === 0) {
-    navigate("/login");
-    return;
-  }
+    if (redirectTimer === 0) {
+      navigate("/dashboard");
+      return;
+    }
 
-  const interval = setInterval(() => {
-    setRedirectTimer((t) => t - 1);
-  }, 1000);
+    const interval = setInterval(() => {
+      setRedirectTimer((t) => t - 1);
+    }, 1000);
 
-  return () => clearInterval(interval);
-}, [showSuccessPopup, redirectTimer]);
+    return () => clearInterval(interval);
+  }, [showSuccessPopup, redirectTimer]);
 
 
   useEffect(() => {
@@ -100,11 +100,11 @@ const [showSuccessPopup, setShowSuccessPopup] = useState(false);
 
   /* ===== RESEND ===== */
 
-//   const handleResend = () => {
-//     dispatch(resendOtp(userId));
-//     toast.success("OTP resent");
-//     setTimer(60);
-//   };
+  //   const handleResend = () => {
+  //     dispatch(resendOtp(userId));
+  //     toast.success("OTP resent");
+  //     setTimer(60);
+  //   };
 
   return (
     <AuthLayout>
@@ -127,7 +127,9 @@ const [showSuccessPopup, setShowSuccessPopup] = useState(false);
               <input
                 key={index}
                 id={`otp-${index}`}
-                type="text"
+                type="tel"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={digit}
                 onChange={(e) =>
                   handleChange(e.target.value, index)
@@ -168,37 +170,37 @@ const [showSuccessPopup, setShowSuccessPopup] = useState(false);
               </span>
             )}
           </div> */}
-              {/* BACK */}
-          <Link to = "/register"
+          {/* BACK */}
+          <Link to="/register"
             className="text-center text-sm text-gray-500 cursor-pointer hover:text-gray-300"
           >
-           ← Back to registration
+            ← Back to registration
           </Link>
 
         </form>
         {showSuccessPopup && (
-  <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-    
-    <div className="bg-[#020617] p-8 rounded-2xl shadow-2xl text-center w-80 border border-green-500/30">
-      
-      <div className="text-green-400 text-3xl mb-3">✔</div>
+          <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
 
-      <h3 className="text-lg font-semibold mb-2">
-        Email Verified Successfully
-      </h3>
+            <div className="bg-[#020617] p-8 rounded-2xl shadow-2xl text-center w-80 border border-green-500/30">
 
-      <p className="text-gray-400 text-sm">
-        Redirecting to login in{" "}
-        <span className="text-green-400 font-semibold">
-          {redirectTimer}
-        </span>{" "}
-        seconds...
-      </p>
+              <div className="text-green-400 text-3xl mb-3">✔</div>
 
-    </div>
+              <h3 className="text-lg font-semibold mb-2">
+                Email Verified Successfully
+              </h3>
 
-  </div>
-)}
+              <p className="text-gray-400 text-sm">
+                Redirecting to dashboard in{" "}
+                <span className="text-green-400 font-semibold">
+                  {redirectTimer}
+                </span>{" "}
+                seconds...
+              </p>
+
+            </div>
+
+          </div>
+        )}
 
       </div>
     </AuthLayout>

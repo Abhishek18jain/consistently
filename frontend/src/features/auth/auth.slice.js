@@ -76,8 +76,8 @@ const authSlice = createSlice({
       state.error = null;
     },
     setAuthChecked: (state) => {
-  state.authChecked = true;
-},
+      state.authChecked = true;
+    },
 
     clearRegisterSuccess: (state) => {
       state.registerSuccess = false;
@@ -125,9 +125,16 @@ const authSlice = createSlice({
         state.verifyLoading = true;
       })
 
-      .addCase(verifyEmail.fulfilled, (state) => {
+      .addCase(verifyEmail.fulfilled, (state, action) => {
         state.verifyLoading = false;
         state.verified = true;
+
+        const token = action.payload.token;
+        if (token) {
+          state.token = token;
+          state.isAuthenticated = true;
+          localStorage.setItem("token", token);
+        }
       })
 
       .addCase(verifyEmail.rejected, (state, action) => {

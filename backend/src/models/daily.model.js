@@ -14,7 +14,7 @@ const dailyStatsSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
-   completion: {
+    completion: {
       type: Number,
       min: 0,
       max: 100,
@@ -30,7 +30,7 @@ const dailyStatsSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
-        nearMiss: {
+    nearMiss: {
       type: Boolean,
       default: false
       // completion between 60–69
@@ -63,7 +63,7 @@ const dailyStatsSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-// One stat per day per user
-dailyStatsSchema.index({ userId: 1, date: 1 }, { unique: true });
+// One stat per day per user per journal
+dailyStatsSchema.index({ userId: 1, date: 1, bookId: 1 }, { unique: true });
 
 export default mongoose.model("DailyStats", dailyStatsSchema);

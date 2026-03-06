@@ -113,16 +113,8 @@ export default function EnergyPlannerLayout({ template, blocks, setBlocks }) {
         const block = blocks.find(b => b.id === item.blockId);
         if (!block) return;
 
-        const blockItems = (block.data?.items || []).map((bi, i) => {
-            const normalItem = typeof bi === "string"
-                ? { text: bi, checked: false }
-                : { ...bi };
-            if (b => b.id === item.blockId) return normalItem;
-            return bi;
-        });
-
         // Find which item within this block corresponds to our item
-        const blockItemIdx = (block.data?.items || []).findIndex((bi, localIdx) => {
+        const blockItemIdx = (block.data?.items || []).findIndex((bi) => {
             const normalBi = typeof bi === "string" ? { text: bi, checked: false } : bi;
             return normalBi.text === item.text;
         });

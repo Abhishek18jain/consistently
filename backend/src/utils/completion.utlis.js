@@ -16,7 +16,7 @@
  * @param {String} journalType - "todo" | "planner" | "travel" | "blank" etc.
  * @returns {Object} { completion, success, nearMiss, excluded, totalTasks, completedTasks }
  */
-export function calculateCompletionFromBlocks(blocks = [], journalType = "blank") {
+export function calculateCompletionFromBlocks(blocks = [], journalType = "blank", date = null) {
   // Non-trackable journal types
   const NON_TRACKABLE = ["blank", "travel", "reflection"];
 
@@ -29,6 +29,13 @@ export function calculateCompletionFromBlocks(blocks = [], journalType = "blank"
       totalTasks: 0,
       completedTasks: 0,
     };
+  }
+
+  let currentDay = "";
+  if (date) {
+    const d = new Date(date + "T00:00:00.000Z");
+    const days = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
+    currentDay = days[d.getUTCDay()];
   }
 
   // Extract all checklist items across all checklist blocks
@@ -46,7 +53,17 @@ export function calculateCompletionFromBlocks(blocks = [], journalType = "blank"
           const text = item.text?.trim?.() || "";
           if (text) {
             totalTasks++;
-            if (item.checked) completedTasks++;
+
+            // Habit Grid item
+            if (item.days && typeof item.days === "object") {
+              if (currentDay && item.days[currentDay]) {
+                completedTasks++;
+              }
+            }
+            // Standard checklist item
+            else if (item.checked) {
+              completedTasks++;
+            }
           }
         }
       }

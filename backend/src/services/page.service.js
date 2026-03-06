@@ -56,10 +56,10 @@ async function updateJournalAfterPageCreate({
 /**
  * CREATE PAGE FROM TEMPLATE FOR TODAY
  */
-export async function createPageFromTemplate({ journalId, templateId }) {
-  const today = getTodayDateString();
+export async function createPageFromTemplate({ journalId, templateId, targetDate }) {
+  const dateToUse = targetDate || getTodayDateString();
 
-  const existing = await Page.findOne({ journalId, date: today });
+  const existing = await Page.findOne({ journalId, date: dateToUse });
   if (existing) {
     await Journal.findByIdAndUpdate(
       journalId,
@@ -82,7 +82,7 @@ export async function createPageFromTemplate({ journalId, templateId }) {
 
   const page = await Page.create({
     journalId,
-    date: today,
+    date: dateToUse,
     contentJSON: content,
     createdFromTemplateId: templateId,
   });
@@ -90,7 +90,7 @@ export async function createPageFromTemplate({ journalId, templateId }) {
   await updateJournalAfterPageCreate({
     journalId,
     pageId: page._id,
-    date: today,
+    date: dateToUse,
     templateId,
   });
 

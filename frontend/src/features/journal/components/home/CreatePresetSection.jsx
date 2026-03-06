@@ -5,6 +5,7 @@ const presets = [
   { type: "todo", label: "Todo", emoji: "✅", color: "from-blue-50 to-blue-100/50" },
   { type: "planner", label: "Planner", emoji: "📅", color: "from-purple-50 to-purple-100/50" },
   { type: "travel", label: "Travel", emoji: "✈️", color: "from-amber-50 to-amber-100/50" },
+  { type: "coder", label: "Coder", emoji: "💻", color: "from-emerald-50 to-emerald-100/50" },
 ];
 
 export default function CreatePresetSection({ onPresetClick }) {
@@ -12,7 +13,7 @@ export default function CreatePresetSection({ onPresetClick }) {
     <div>
       <h2 className="text-lg font-semibold text-gray-900 mb-4">Create New</h2>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         {presets.map((p) => (
           <button
             key={p.type}

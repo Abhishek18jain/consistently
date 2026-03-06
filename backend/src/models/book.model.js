@@ -30,7 +30,8 @@ const journalSchema = new mongoose.Schema(
         "matrix",
         "workspace",
         "energy",
-        "focus"
+        "focus",
+        "coder"
       ],
       required: true,
       index: true,

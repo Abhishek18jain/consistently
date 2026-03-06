@@ -76,7 +76,13 @@ export default function JournalEditorPage() {
   const createNewPage = async (templateId) => {
     setCreatingPage(true);
     try {
-      const res = await pageApi.createFromTemplate(journalId, templateId);
+      const latestReq = await pageApi.getLatestPage(journalId);
+      const latestDateStr = latestReq.data?.date || new Date().toISOString().split("T")[0];
+      const d = new Date(latestDateStr);
+      d.setDate(d.getDate() + 1);
+      const targetDate = d.toISOString().split("T")[0];
+
+      const res = await pageApi.createFromTemplate(journalId, templateId, targetDate);
       const newPage = res.data;
       setShowNewPageModal(false);
       navigate(`/journals/${journalId}/date/${newPage.date}`);

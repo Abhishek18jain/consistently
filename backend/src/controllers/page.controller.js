@@ -18,11 +18,12 @@ import Journal from "../models/book.model.js";
 export async function createFromTemplate(req, res) {
   try {
     console.log(req.body);
-    const { journalId, templateId } = req.body;
+    const { journalId, templateId, targetDate } = req.body;
 
     const page = await createPageFromTemplate({
       journalId,
       templateId,
+      targetDate,
     });
     res.status(201).json(page);
   } catch (err) {

@@ -22,8 +22,16 @@ export async function processStreak(dailyStats) {
   let currentStreak = user.streak?.current || 0;
   let bestStreak = user.streak?.best || 0;
 
-  // ❌ FAILED DAY → BREAK STREAK
+  const isSameDay = lastSuccess && daysBetween(lastSuccess, today) === 0;
+
+  // ❌ FAILED DAY
   if (!dailyStats.success) {
+    // If they already succeeded today with another journal, ignore this failure for streak
+    if (isSameDay) {
+      return { status: "preserved" };
+    }
+
+    // BREAK STREAK
     if (currentStreak > 0) {
       await StreakEvent.create({
         userId: user._id,
@@ -40,7 +48,7 @@ export async function processStreak(dailyStats) {
     user.streak = {
       current: 0,
       best: bestStreak,
-      lastSuccessDate: null
+      lastSuccessDate: lastSuccess
     };
 
     await user.save();
@@ -48,11 +56,20 @@ export async function processStreak(dailyStats) {
   }
 
   // ✅ SUCCESS DAY
+  if (isSameDay) {
+    // Already succeeded today, just return
+    return {
+      status: "success",
+      currentStreak,
+      bestStreak
+    };
+  }
+
   const isConsecutive =
     lastSuccess &&
     daysBetween(lastSuccess, today) === 1;
 
-  currentStreak = isConsecutive ? currentStreak + 1 : 1;
+  currentStreak = isConsecutive ? currentStreak + 1 : (currentStreak === 0 ? 1 : 1);
   bestStreak = Math.max(bestStreak, currentStreak);
 
   // RECOVERY EVENT

@@ -86,6 +86,7 @@ export default function CreateJournalPage() {
                 Reflection
               </option>
               <option value="fitness">Fitness</option>
+              <option value="coder">Coder</option>
               <option value="blank">Blank</option>
             </select>
           </div>
